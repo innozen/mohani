@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>파일 선택 테스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-area {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        #fileInfo {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e9ecef;
+            border-radius: 6px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-area">
+        <h1>📁 파일 선택 테스트</h1>
+        <p>아래 버튼들을 클릭해서 파일 선택창이 열리는지 확인해보세요.</p>
+        
+        <input type="file" id="fileInput" accept="image/*" style="display: none;">
+        
+        <!-- 방법 1: 직접 onclick -->
+        <button onclick="document.getElementById('fileInput').click()">
+            방법 1: 직접 onclick
+        </button>
+        
+        <!-- 방법 2: JavaScript 이벤트 리스너 -->
+        <button id="jsButton">
+            방법 2: JS 이벤트 리스너
+        </button>
+        
+        <!-- 방법 3: label 사용 -->
+        <label for="fileInput2" style="display: inline-block; background: #28a745; color: white; padding: 12px 24px; border-radius: 6px; cursor: pointer; margin: 10px;">
+            방법 3: Label 사용
+        </label>
+        <input type="file" id="fileInput2" accept="image/*" style="display: none;">
+        
+        <div id="fileInfo" style="display: none;">
+            <h3>선택된 파일 정보:</h3>
+            <div id="fileDetails"></div>
+        </div>
+    </div>
+
+    <script>
+        console.log('테스트 페이지 로드됨');
+        
+        // 방법 2: JavaScript 이벤트 리스너
+        document.getElementById('jsButton').addEventListener('click', function() {
+            console.log('JS 버튼 클릭됨');
+            document.getElementById('fileInput').click();
+        });
+        
+        // 파일 선택 이벤트 처리
+        function handleFileChange(input, inputId) {
+            input.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    console.log('파일 선택됨:', file.name);
+                    
+                    const fileInfo = document.getElementById('fileInfo');
+                    const fileDetails = document.getElementById('fileDetails');
+                    
+                    fileDetails.innerHTML = `
+                        <strong>파일명:</strong> ${file.name}<br>
+                        <strong>크기:</strong> ${(file.size / 1024).toFixed(2)} KB<br>
+                        <strong>타입:</strong> ${file.type}<br>
+                        <strong>수정일:</strong> ${new Date(file.lastModified).toLocaleString()}<br>
+                        <strong>선택 방법:</strong> ${inputId}
+                    `;
+                    
+                    fileInfo.style.display = 'block';
+                }
+            });
+        }
+        
+        // 이벤트 리스너 등록
+        handleFileChange(document.getElementById('fileInput'), 'fileInput (방법 1, 2)');
+        handleFileChange(document.getElementById('fileInput2'), 'fileInput2 (방법 3)');
+        
+        // 페이지 로드 확인
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM 로드 완료');
+        });
+    </script>
+</body>
+</html>
+
