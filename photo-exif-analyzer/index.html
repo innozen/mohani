@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>너네 모하니 - 사진 분석</title>
+    <link rel="stylesheet" href="styles.css?v=024">
+    <!-- EXIF 라이브러리 (여러 CDN 시도) -->
+    <script src="https://cdn.jsdelivr.net/npm/exif-js@2.3.0/exif.js" 
+            onerror="this.onerror=null; this.src='https://unpkg.com/exif-js@2.3.0/exif.js'"></script>
+    
+    <!-- Face-api.js (가장 안정적이고 가벼운 얼굴 인식 라이브러리) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📸 너네 모하니</h1>
+            <p>사진을 업로드해주세요.</p>
+        </header>
+
+        <main>
+            <div class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-content">
+                        <div class="upload-icon">📷</div>
+                        <h3>사진을 업로드하세요</h3>
+                        <p>클릭하거나 드래그하여 사진을 선택하세요</p>
+                        <div class="loading" id="initialLoading">모델을 로딩 중입니다...</div>
+                        <input type="file" id="fileInput" accept="image/*" hidden>
+                        <button class="upload-btn" id="uploadBtn" style="display: none;">
+                            사진 선택
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="analysis-section" id="analysisSection" style="display: none;">
+                <div class="photo-preview">
+                    <img id="previewImage" alt="업로드된 사진">
+                </div>
+
+                <div class="analysis-grid">
+                    <div class="analysis-card" id="whoCard">
+                        <div class="card-header">
+                            <h3>👤 누가 (Who)</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="face-container" id="faceContainer">
+                                <p>얼굴 인식 중...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="analysis-card" id="whenCard">
+                        <div class="card-header">
+                            <h3>🕐 언제 (When)</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="date-time-info" id="dateTimeInfo">
+                                <p>날짜 정보를 분석 중...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="analysis-card" id="whereCard">
+                        <div class="card-header">
+                            <h3>📍 어디서 (Where)</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="location-info" id="locationInfo">
+                                <p>위치 정보를 분석 중...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="analysis-card" id="howCard">
+                        <div class="card-header">
+                            <h3>🎯 어떻게 (How)</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="activity-info" id="activityInfo">
+                                <p>활동 정보를 분석 중...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="analysis-card" id="whyCard">
+                        <div class="card-header">
+                            <h3>🎉 왜 (Why)</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="event-info" id="eventInfo">
+                                <p>이벤트 정보를 분석 중...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>© 2024 너네 모하니 - 사진 분석</p>
+            <p class="version-info">v0.024</p>
+        </footer>
+    </div>
+
+    <script src="script.js?v=024"></script>
+</body>
+</html>

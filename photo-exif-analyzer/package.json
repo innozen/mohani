@@ -1,0 +1,26 @@
+{
+  "name": "photo-exif-analyzer",
+  "version": "0.0.24",
+  "description": "너네 모하니 - 사진을 분석하여 5W1H 정보를 표시하고 얼굴 썸네일을 생성하는 웹사이트",
+  "main": "index.html",
+  "scripts": {
+    "start": "http-server -p 3000 -c-1",
+    "dev": "http-server -p 8080 -c-1",
+    "serve": "live-server --port=3000 --no-browser"
+  },
+  "keywords": [
+    "exif",
+    "photo",
+    "metadata",
+    "5w1h",
+    "face-detection",
+    "thumbnail",
+    "web-app"
+  ],
+  "author": "EXIF Analyzer Team",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "live-server": "^1.2.2"
+  }
+}
