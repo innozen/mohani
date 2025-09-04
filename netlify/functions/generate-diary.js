@@ -1,7 +1,10 @@
 /**
  * Netlify Function: Gemini API를 사용한 일기 생성
  * 환경변수에서 API 키를 안전하게 가져와서 사용
+ * 최신 Google Gemini SDK 방식 사용
  */
+
+const { GoogleGenAI } = require("@google/genai");
 
 exports.handler = async (event, context) => {
     // CORS 헤더 설정
@@ -57,71 +60,54 @@ exports.handler = async (event, context) => {
             };
         }
 
-        console.log('🤖 Gemini API 호출 시작');
+        console.log('🤖 Gemini API 호출 시작 (SDK 방식)');
         console.log('📝 프롬프트 길이:', prompt.length);
 
-        // Gemini API 호출
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
-        
-        const geminiRequestBody = {
-            contents: [{
-                parts: [{
-                    text: prompt
-                }]
-            }],
-            generationConfig: {
-                temperature: 0.7,
-                topK: 40,
-                topP: 0.95,
-                maxOutputTokens: 1024,
+        // Google Gemini SDK 초기화
+        const ai = new GoogleGenAI({ apiKey });
+
+        try {
+            // Gemini 2.5 Flash 모델로 일기 생성
+            const response = await ai.models.generateContent({
+                model: "gemini-2.5-flash",
+                contents: prompt,
+                generationConfig: {
+                    temperature: 0.7,
+                    topK: 40,
+                    topP: 0.95,
+                    maxOutputTokens: 1024,
+                }
+            });
+
+            if (!response || !response.text) {
+                throw new Error('API 응답에서 텍스트를 찾을 수 없습니다.');
             }
-        };
 
-        const response = await fetch(geminiUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(geminiRequestBody)
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error('❌ Gemini API 오류:', errorData);
+            const diaryText = response.text;
             
+            console.log('✅ 일기 생성 완료');
+            console.log('📄 생성된 일기 길이:', diaryText.length);
+
             return {
-                statusCode: response.status,
+                statusCode: 200,
                 headers,
                 body: JSON.stringify({ 
-                    error: `Gemini API 오류: ${errorData.error?.message || response.statusText}` 
+                    diary: diaryText.trim(),
+                    success: true 
                 })
             };
-        }
 
-        const data = await response.json();
-        
-        if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-            console.error('❌ Gemini API 응답 형식 오류:', data);
+        } catch (apiError) {
+            console.error('❌ Gemini SDK 오류:', apiError);
+            
             return {
                 statusCode: 500,
                 headers,
-                body: JSON.stringify({ error: 'API 응답 형식이 올바르지 않습니다.' })
+                body: JSON.stringify({ 
+                    error: `Gemini API 오류: ${apiError.message}` 
+                })
             };
         }
-
-        const diaryText = data.candidates[0].content.parts[0].text;
-        
-        console.log('✅ 일기 생성 완료');
-        console.log('📄 생성된 일기 길이:', diaryText.length);
-
-        return {
-            statusCode: 200,
-            headers,
-            body: JSON.stringify({ 
-                diary: diaryText.trim(),
-                success: true 
-            })
-        };
 
     } catch (error) {
         console.error('❌ 서버 오류:', error);

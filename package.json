@@ -19,6 +19,9 @@
   ],
   "author": "EXIF Analyzer Team",
   "license": "MIT",
+  "dependencies": {
+    "@google/genai": "^0.2.0"
+  },
   "devDependencies": {
     "http-server": "^14.1.1",
     "live-server": "^1.2.2"
