@@ -11,7 +11,13 @@ const AppState = {
     elements: {},
     isMobile: false,
     isIOS: false,
-    isAndroid: false
+    isAndroid: false,
+    // 성능 최적화를 위한 추가 상태
+    imageCache: new Map(),
+    debounceTimer: null,
+    lastProcessedImage: null,
+    // 분석 데이터 저장
+    analysisData: null
 };
 
 // 모바일 환경 감지
@@ -48,7 +54,11 @@ function initializeElements() {
         activityInfo: document.getElementById('activityInfo'),
         eventInfo: document.getElementById('eventInfo'),
         initialLoading: document.getElementById('initialLoading'),
-        uploadBtn: document.getElementById('uploadBtn')
+        uploadBtn: document.getElementById('uploadBtn'),
+        // 일기 생성 관련 요소들
+        diarySection: document.getElementById('diarySection'),
+        generateDiary: document.getElementById('generateDiary'),
+        diaryContent: document.getElementById('diaryContent')
     };
     
     // 모든 요소가 존재하는지 확인
@@ -235,12 +245,13 @@ function showUploadReady() {
 function setupEventListeners() {
     console.log('🎯 이벤트 리스너 설정');
     
-    const { uploadArea, fileInput, uploadBtn } = AppState.elements;
+    const { uploadArea, fileInput, uploadBtn, generateDiary } = AppState.elements;
     
     // 모든 기존 이벤트 리스너 제거
     uploadArea.removeEventListener('click', handleUploadAreaClick);
     uploadBtn.removeEventListener('click', handleUploadButtonClick);
     fileInput.removeEventListener('change', handleFileChange);
+    generateDiary.removeEventListener('click', handleGenerateDiary);
     
     // 파일 입력 변경 이벤트
     fileInput.addEventListener('change', handleFileChange);
@@ -250,6 +261,9 @@ function setupEventListeners() {
     
     // 버튼 클릭 이벤트 (새로운 함수)
     uploadBtn.addEventListener('click', handleUploadButtonClick);
+    
+    // 일기 생성 버튼 이벤트
+    generateDiary.addEventListener('click', handleGenerateDiary);
     
     // 드래그 앤 드롭 이벤트
     uploadArea.addEventListener('dragover', handleDragOver);
@@ -565,8 +579,48 @@ function handleFileChange(event) {
 // 마지막 처리된 파일 정보 (중복 방지용)
 let lastProcessedFile = null;
 
+// 이미지 최적화 함수 (성능 향상)
+function optimizeImage(file) {
+    return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        
+        img.onload = () => {
+            // 이미지 크기 최적화 (너무 큰 이미지는 리사이즈)
+            const maxSize = 1200;
+            let { width, height } = img;
+            
+            if (width > maxSize || height > maxSize) {
+                if (width > height) {
+                    height = (height * maxSize) / width;
+                    width = maxSize;
+                } else {
+                    width = (width * maxSize) / height;
+                    height = maxSize;
+                }
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            
+            // 이미지 품질 최적화
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            // 최적화된 이미지를 Blob으로 변환
+            canvas.toBlob((blob) => {
+                resolve(blob);
+            }, 'image/jpeg', 0.85); // 품질 85%로 최적화
+        };
+        
+        img.src = URL.createObjectURL(file);
+    });
+}
+
 // 파일 처리
-function handleFile(file) {
+async function handleFile(file) {
     console.log('📄 파일 처리 시작:', file.name, file.type, file.size);
     
     // 이미지 파일인지 확인
@@ -594,27 +648,62 @@ function handleFile(file) {
     lastProcessedFile = fileKey;
     console.log('🔄 파일 처리 시작 - 플래그 설정됨');
     
-    // 파일 읽기
-    const reader = new FileReader();
-    
-    reader.onload = (event) => {
-        console.log('📖 파일 읽기 완료');
-        AppState.currentImage = event.target.result;
+    // 이미지 최적화 후 처리
+    try {
+        console.log('🔄 이미지 최적화 시작...');
+        const optimizedBlob = await optimizeImage(file);
+        console.log('✅ 이미지 최적화 완료');
         
-        // 미리보기 이미지 설정
-        AppState.elements.previewImage.src = AppState.currentImage;
+        // 최적화된 이미지로 처리
+        const reader = new FileReader();
         
-        // 분석 섹션 표시
-        showAnalysisSection();
+        reader.onload = (event) => {
+            console.log('📖 파일 읽기 완료');
+            AppState.currentImage = event.target.result;
+            
+            // 미리보기 이미지 설정
+            AppState.elements.previewImage.src = AppState.currentImage;
+            
+            // 분석 섹션 표시
+            showAnalysisSection();
+            
+            // 로딩 상태 표시
+            showLoadingStates();
+            
+            // EXIF 분석 시작
+            setTimeout(() => {
+                analyzeImage(file);
+            }, 100); // 약간의 지연으로 UI 업데이트 보장
+        };
         
-        // 로딩 상태 표시
-        showLoadingStates();
+        reader.readAsDataURL(optimizedBlob);
+    } catch (error) {
+        console.warn('⚠️ 이미지 최적화 실패, 원본으로 진행:', error);
         
-        // EXIF 분석 시작
-        setTimeout(() => {
-            analyzeImage(file);
-        }, 100); // 약간의 지연으로 UI 업데이트 보장
-    };
+        // 최적화 실패 시 원본으로 처리
+        const reader = new FileReader();
+        
+        reader.onload = (event) => {
+            console.log('📖 파일 읽기 완료 (원본)');
+            AppState.currentImage = event.target.result;
+            
+            // 미리보기 이미지 설정
+            AppState.elements.previewImage.src = AppState.currentImage;
+            
+            // 분석 섹션 표시
+            showAnalysisSection();
+            
+            // 로딩 상태 표시
+            showLoadingStates();
+            
+            // EXIF 분석 시작
+            setTimeout(() => {
+                analyzeImage(file);
+            }, 100);
+        };
+        
+        reader.readAsDataURL(file);
+    }
     
     reader.onerror = (error) => {
         console.error('❌ 파일 읽기 오류:', error);
@@ -630,10 +719,16 @@ function handleFile(file) {
 function showAnalysisSection() {
     console.log('📊 분석 섹션 표시');
     
-    const { analysisSection } = AppState.elements;
+    const { analysisSection, diarySection } = AppState.elements;
     if (analysisSection) {
         analysisSection.style.display = 'block';
         analysisSection.classList.add('fade-in');
+    }
+    
+    // 일기 섹션도 표시
+    if (diarySection) {
+        diarySection.style.display = 'block';
+        diarySection.classList.add('fade-in');
     }
 }
 
@@ -669,6 +764,10 @@ async function analyzeImage(file) {
         ]);
         
         console.log('✅ 모든 분석 완료');
+        
+        // 분석 데이터 수집 및 저장
+        collectAnalysisData(exifData);
+        
     } catch (error) {
         console.error('❌ 분석 중 오류:', error);
     } finally {
@@ -1535,6 +1634,53 @@ async function getAddressFromCoordinates(latitude, longitude) {
     }
 }
 
+// 메모리 정리 함수 (성능 최적화)
+function cleanupMemory() {
+    console.log('🧹 메모리 정리 시작');
+    
+    // 이미지 캐시 정리
+    if (AppState.imageCache.size > 10) {
+        const entries = Array.from(AppState.imageCache.entries());
+        const toDelete = entries.slice(0, 5); // 오래된 5개 삭제
+        
+        toDelete.forEach(([key]) => {
+            AppState.imageCache.delete(key);
+        });
+        
+        console.log(`🗑️ 이미지 캐시 정리: ${toDelete.length}개 삭제`);
+    }
+    
+    // 가비지 컬렉션 유도 (가능한 경우)
+    if (window.gc) {
+        try {
+            window.gc();
+            console.log('♻️ 가비지 컬렉션 실행');
+        } catch (error) {
+            console.log('⚠️ 가비지 컬렉션 실행 불가');
+        }
+    }
+}
+
+// 성능 모니터링 함수
+function startPerformanceMonitoring() {
+    if ('performance' in window) {
+        const observer = new PerformanceObserver((list) => {
+            for (const entry of list.getEntries()) {
+                if (entry.entryType === 'measure') {
+                    console.log(`📊 성능 측정: ${entry.name} - ${entry.duration.toFixed(2)}ms`);
+                }
+            }
+        });
+        
+        try {
+            observer.observe({ entryTypes: ['measure'] });
+            console.log('📊 성능 모니터링 시작');
+        } catch (error) {
+            console.log('⚠️ 성능 모니터링 시작 불가');
+        }
+    }
+}
+
 // 앱 초기화
 function initializeApp() {
     console.log('🚀 사진 EXIF 분석기 초기화 시작');
@@ -1551,6 +1697,12 @@ function initializeApp() {
         
         // Face API 로드 (수정된 버전)
         loadFaceAPI();
+        
+        // 성능 모니터링 시작
+        startPerformanceMonitoring();
+        
+        // 주기적 메모리 정리 (5분마다)
+        setInterval(cleanupMemory, 5 * 60 * 1000);
         
         // 업로드 준비 상태로 변경
         showUploadReady();
@@ -1589,3 +1741,164 @@ window.addEventListener('error', (event) => {
 window.addEventListener('unhandledrejection', (event) => {
     console.error('❌ 처리되지 않은 Promise 거부:', event.reason);
 });
+
+
+// 일기 생성 버튼 처리
+function handleGenerateDiary() {
+    console.log('📝 일기 생성 요청');
+    
+    if (!AppState.analysisData) {
+        alert('사진 분석이 완료되지 않았습니다. 먼저 사진을 업로드하고 분석을 완료해주세요.');
+        return;
+    }
+    
+    generateDiaryWithBackend();
+}
+
+// 분석 데이터 수집
+function collectAnalysisData(exifData) {
+    console.log('📊 분석 데이터 수집');
+    
+    const { faceContainer, dateTimeInfo, locationInfo, activityInfo, eventInfo } = AppState.elements;
+    
+    AppState.analysisData = {
+        exif: exifData,
+        who: faceContainer ? faceContainer.textContent : '',
+        when: dateTimeInfo ? dateTimeInfo.textContent : '',
+        where: locationInfo ? locationInfo.textContent : '',
+        how: activityInfo ? activityInfo.textContent : '',
+        why: eventInfo ? eventInfo.textContent : '',
+        imageData: AppState.currentImage
+    };
+    
+    console.log('✅ 분석 데이터 수집 완료:', AppState.analysisData);
+}
+
+// 백엔드 API를 사용한 일기 생성
+async function generateDiaryWithBackend() {
+    console.log('🤖 백엔드 API로 일기 생성 시작');
+    
+    const { diaryContent, generateDiary } = AppState.elements;
+    
+    // 로딩 상태 표시
+    generateDiary.disabled = true;
+    generateDiary.textContent = '일기 생성 중...';
+    diaryContent.innerHTML = `
+        <div class="loading">
+            AI가 사진을 분석하고 일기를 작성하고 있습니다...
+        </div>
+    `;
+    
+    try {
+        // 분석 데이터를 프롬프트로 변환
+        const prompt = createDiaryPrompt(AppState.analysisData);
+        
+        // 백엔드 API 호출
+        const diaryText = await callBackendAPI(prompt);
+        
+        // 일기 표시
+        diaryContent.innerHTML = `
+            <div class="diary-text">${diaryText}</div>
+        `;
+        
+        console.log('✅ 일기 생성 완료');
+        
+    } catch (error) {
+        console.error('❌ 일기 생성 오류:', error);
+        diaryContent.innerHTML = `
+            <div class="error">
+                일기 생성 중 오류가 발생했습니다.<br>
+                <small>${error.message}</small>
+            </div>
+        `;
+    } finally {
+        // 버튼 상태 복원
+        generateDiary.disabled = false;
+        generateDiary.textContent = '일기 생성하기';
+    }
+}
+
+// 일기 생성 프롬프트 생성
+function createDiaryPrompt(analysisData) {
+    const { exif, who, when, where, how, why } = analysisData;
+    
+    let prompt = `다음은 사진의 EXIF 데이터와 분석 결과입니다. 이 정보를 바탕으로 감성적이고 개인적인 일기를 작성해주세요.
+
+📸 사진 분석 결과:
+- 누가 (Who): ${who}
+- 언제 (When): ${when}
+- 어디서 (Where): ${where}
+- 어떻게 (How): ${how}
+- 왜 (Why): ${why}
+
+📋 EXIF 데이터:
+`;
+
+    // 주요 EXIF 정보 추가
+    if (exif.DateTimeOriginal) {
+        prompt += `- 촬영 시간: ${exif.DateTimeOriginal}\n`;
+    }
+    if (exif.GPSLatitude && exif.GPSLongitude) {
+        prompt += `- 위치: 위도 ${exif.GPSLatitude}, 경도 ${exif.GPSLongitude}\n`;
+    }
+    if (exif.FNumber) {
+        prompt += `- 조리개: f/${exif.FNumber}\n`;
+    }
+    if (exif.ExposureTime) {
+        prompt += `- 셔터 속도: ${exif.ExposureTime}초\n`;
+    }
+    if (exif.ISOSpeedRatings) {
+        prompt += `- ISO: ${exif.ISOSpeedRatings}\n`;
+    }
+    if (exif.Flash) {
+        prompt += `- 플래시: ${exif.Flash}\n`;
+    }
+
+    prompt += `
+위 정보를 바탕으로 다음 조건에 맞는 일기를 작성해주세요:
+
+1. 개인적이고 감성적인 톤으로 작성
+2. 사진 속 상황과 감정을 상상하여 묘사
+3. 그 순간의 특별함과 의미를 강조
+4. 자연스럽고 따뜻한 문체 사용
+5. 200-300자 정도의 적당한 길이
+6. 한국어로 작성
+
+일기 내용만 작성해주세요 (제목이나 날짜는 제외):`;
+
+    return prompt;
+}
+
+// 백엔드 API 호출
+async function callBackendAPI(prompt) {
+    console.log('🌐 백엔드 API 호출');
+    
+    const url = '/.netlify/functions/generate-diary';
+    
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ prompt })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `HTTP 오류: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.success || !data.diary) {
+            throw new Error('API 응답 형식이 올바르지 않습니다.');
+        }
+        
+        return data.diary;
+        
+    } catch (error) {
+        console.error('❌ 백엔드 API 호출 실패:', error);
+        throw error;
+    }
+}
