@@ -60,8 +60,8 @@ exports.handler = async (event, context) => {
         console.log('🤖 Gemini API 호출 시작');
         console.log('📝 프롬프트 길이:', prompt.length);
 
-        // Gemini API 호출 (최신 모델명 사용)
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`;
+        // Gemini API 호출 (gemini-2.5-flash 모델 사용)
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
         
         const geminiRequestBody = {
             contents: [{
