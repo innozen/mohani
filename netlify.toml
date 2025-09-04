@@ -1,0 +1,24 @@
+[build]
+  # 빌드 명령어 (정적 사이트이므로 빌드 불필요)
+  command = ""
+  # 빌드 결과물 디렉토리
+  publish = "."
+
+[functions]
+  # Netlify Functions 디렉토리
+  directory = "netlify/functions"
+
+[[redirects]]
+  # SPA 라우팅을 위한 리다이렉트 (필요시)
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# 개발 서버 설정
+[dev]
+  # 개발 서버 포트
+  port = 8888
+  # 자동 리로드
+  autoLaunch = true
+  # 로그 레벨
+  logLevel = "info"

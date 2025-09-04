@@ -1,132 +1,127 @@
-# 📸 사진 EXIF 분석기 - 5W1H
+# 📸 너네 모하니 - 사진 분석 및 AI 일기 생성기
 
-사진을 업로드하면 EXIF 데이터를 분석하여 5W1H(누가, 언제, 어디서, 어떻게, 왜) 정보를 시각적으로 보여주는 웹사이트입니다.
+사진의 EXIF 데이터를 분석하여 5W1H 정보를 추출하고, Gemini AI를 활용해 감성적인 일기를 자동 생성하는 웹 애플리케이션입니다.
 
 ## ✨ 주요 기능
 
-### 1. 👤 누가 (Who)
-- 사진에서 얼굴을 자동으로 감지
-- 감지된 얼굴을 작은 썸네일로 표시
-- 얼굴 개수 정보 제공
+- 📷 **사진 업로드**: 드래그 앤 드롭 또는 클릭으로 사진 업로드
+- 🔍 **EXIF 분석**: 촬영 시간, 위치, 카메라 설정 등 메타데이터 추출
+- 👤 **얼굴 인식**: Face-api.js를 활용한 자동 얼굴 감지
+- 📍 **위치 정보**: GPS 좌표를 주소로 변환
+- 🤖 **AI 일기 생성**: Gemini AI를 활용한 감성적인 일기 자동 작성
+- 📱 **반응형 디자인**: 모바일과 데스크톱 모두 지원
 
-### 2. 🕐 언제 (When)
-- 사진 촬영 날짜와 시간 표시
-- 한국어 형식으로 날짜 포맷팅
-- 요일 정보 포함
+## 🚀 배포 방법
 
-### 3. 📍 어디서 (Where)
-- GPS 좌표를 주소로 변환
-- 촬영 위치 정보 표시
-- 좌표 정보도 함께 제공
+### 1. Netlify에 배포
 
-### 4. 🎯 어떻게 (How)
-- 카메라 설정 정보 분석
-- ISO, 셔터 스피드, 조리개 값 기반 활동 추론
-- 촬영 환경 및 스타일 분석
+1. 이 저장소를 GitHub에 업로드
+2. Netlify에서 새 사이트 생성
+3. GitHub 저장소 연결
+4. 환경변수 설정 (아래 참조)
 
-### 5. 🎉 왜 (Why)
-- 촬영 월에 따른 모임 정보 표시
-- 계절별 이벤트 분류
-- 예: "8월 모임", "여름철 모임"
+### 2. 환경변수 설정
 
-## 🚀 사용법
+Netlify 대시보드에서 다음 환경변수를 설정하세요:
 
-1. **사진 업로드**
-   - 드래그 앤 드롭으로 사진을 업로드하거나
-   - "사진 선택" 버튼을 클릭하여 파일 선택
+```
+GEMINI_API_KEY=your_actual_gemini_api_key_here
+```
 
-2. **자동 분석**
-   - 업로드된 사진의 EXIF 데이터를 자동으로 분석
-   - 5W1H 정보를 카드 형태로 표시
+**Gemini API 키 발급 방법:**
+1. [Google AI Studio](https://makersuite.google.com/app/apikey) 방문
+2. Google 계정으로 로그인
+3. "Create API Key" 클릭
+4. 생성된 API 키를 복사하여 환경변수에 설정
 
-3. **결과 확인**
-   - 각 카드에서 상세한 분석 결과 확인
-   - 얼굴 썸네일, 위치 정보, 촬영 설정 등 확인
+### 3. 로컬 개발
+
+#### 3-1. Netlify CLI 설치
+```bash
+# Netlify CLI 전역 설치
+npm install -g netlify-cli
+
+# 또는 npx로 실행 (설치 없이)
+npx netlify-cli
+```
+
+#### 3-2. 환경변수 설정
+```bash
+# 저장소 클론
+git clone <your-repo-url>
+cd photo-exif-analyzer
+
+# .env 파일 생성
+echo "GEMINI_API_KEY=your_actual_gemini_api_key_here" > .env
+
+# .env 파일 편집하여 실제 API 키 설정
+# Windows: notepad .env
+# Mac/Linux: nano .env 또는 vim .env
+```
+
+#### 3-3. 로컬 서버 실행
+```bash
+# Netlify 개발 서버 시작
+netlify dev
+
+# 또는 npx 사용
+npx netlify dev
+```
+
+#### 3-4. 브라우저에서 확인
+- 자동으로 브라우저가 열리거나
+- 수동으로 `http://localhost:8888` 접속
 
 ## 🛠️ 기술 스택
 
 - **Frontend**: HTML5, CSS3, JavaScript (ES6+)
-- **EXIF 라이브러리**: exif-js
-- **얼굴 인식**: face-api.js
-- **위치 변환**: Nominatim API (OpenStreetMap)
-- **스타일링**: CSS Grid, Flexbox, CSS Animations
+- **Backend**: Netlify Functions (Node.js)
+- **AI**: Google Gemini API
+- **이미지 처리**: EXIF.js, Face-api.js
+- **배포**: Netlify
 
-## 📦 설치 및 실행
-
-### 1. 의존성 설치
-```bash
-npm install
-```
-
-### 2. 개발 서버 실행
-```bash
-npm run dev
-```
-
-또는
-
-```bash
-npm start
-```
-
-### 3. 브라우저에서 접속
-```
-http://localhost:3000
-```
-
-## 🔧 프로젝트 구조
+## 📁 프로젝트 구조
 
 ```
 photo-exif-analyzer/
-├── index.html          # 메인 HTML 파일
-├── styles.css          # CSS 스타일
-├── script.js           # JavaScript 로직
-├── package.json        # 프로젝트 설정
-└── README.md           # 프로젝트 설명
+├── index.html              # 메인 HTML 파일
+├── script.js               # 프론트엔드 JavaScript
+├── styles.css              # CSS 스타일
+├── netlify/
+│   └── functions/
+│       └── generate-diary.js  # Gemini API 프록시 함수
+├── env-example.txt         # 환경변수 설정 예시
+└── README.md              # 프로젝트 문서
 ```
 
-## 📋 요구사항
+## 🔒 보안
 
-### 브라우저 지원
-- Chrome 60+
-- Firefox 55+
-- Safari 12+
-- Edge 79+
+- API 키는 서버 사이드에서만 사용되며 클라이언트에 노출되지 않습니다
+- Netlify Functions를 통해 안전하게 Gemini API를 호출합니다
+- CORS 정책이 적절히 설정되어 있습니다
 
-### 필수 기능
-- JavaScript 활성화
-- 인터넷 연결 (얼굴 인식 모델 및 위치 변환 API 사용)
+## 🎯 사용 방법
 
-## 🎨 디자인 특징
+1. **사진 업로드**: 메인 화면에서 사진을 드래그하거나 클릭하여 업로드
+2. **분석 대기**: 자동으로 EXIF 데이터와 얼굴 인식이 진행됩니다
+3. **결과 확인**: 5W1H 분석 결과를 확인합니다
+4. **일기 생성**: "일기 생성하기" 버튼을 클릭하여 AI 일기를 생성합니다
 
-- **반응형 디자인**: 모바일, 태블릿, 데스크톱 지원
-- **모던 UI**: 그라데이션 배경, 카드 레이아웃
-- **애니메이션**: 부드러운 전환 효과
-- **직관적 UX**: 드래그 앤 드롭, 시각적 피드백
+## 🐛 문제 해결
 
-## 🔍 EXIF 데이터 분석
+### API 키 관련 오류
+- Gemini API 키가 올바르게 설정되었는지 확인
+- API 키의 권한과 할당량을 확인
+- Netlify 환경변수가 올바르게 설정되었는지 확인
 
-### 지원하는 EXIF 태그
-- **DateTimeOriginal**: 원본 촬영 날짜/시간
-- **DateTime**: 수정된 날짜/시간
-- **CreateDate**: 생성 날짜
-- **GPSLatitude/GPSLongitude**: GPS 좌표
-- **ISOSpeedRatings**: ISO 감도
-- **ExposureTime**: 셔터 스피드
-- **FNumber**: 조리개 값
-- **Flash**: 플래시 사용 여부
+### 이미지 업로드 오류
+- 지원되는 이미지 형식인지 확인 (JPEG, PNG, WebP 등)
+- 이미지 파일 크기가 너무 크지 않은지 확인
+- 브라우저의 JavaScript가 활성화되어 있는지 확인
 
-### 분석 로직
-1. **얼굴 인식**: face-api.js의 TinyFaceDetector 사용
-2. **위치 변환**: GPS 좌표를 Nominatim API로 주소 변환
-3. **활동 추론**: 카메라 설정값 기반 촬영 환경 분석
-4. **이벤트 분류**: 촬영 월에 따른 계절별 모임 분류
+## 📄 라이선스
 
-## 🐛 알려진 이슈
-
-- 일부 브라우저에서 CORS 정책으로 인한 API 호출 제한 가능
-- 매우 큰 이미지 파일의 경우 처리 시간이 오래 걸릴 수 있음
-- GPS 정보가 없는 사진의 경우 위치 정보 표시 불가
+MIT License
 
 ## 🤝 기여하기
 
@@ -136,15 +131,6 @@ photo-exif-analyzer/
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## 📄 라이선스
+## 📞 지원
 
-이 프로젝트는 MIT 라이선스 하에 배포됩니다. 자세한 내용은 `LICENSE` 파일을 참조하세요.
-
-## 📞 문의
-
-프로젝트에 대한 문의사항이나 버그 리포트는 이슈를 통해 남겨주세요.
-
----
-
-**© 2024 사진 EXIF 분석기 - 5W1H 분석**
-
+문제가 발생하거나 기능 요청이 있으시면 GitHub Issues를 통해 문의해주세요.
