@@ -1822,7 +1822,7 @@ async function generateDiaryWithBackend() {
 function createDiaryPrompt(analysisData) {
     const { exif, who, when, where, how, why } = analysisData;
     
-    let prompt = `다음은 사진의 EXIF 데이터와 분석 결과입니다. 이 정보를 바탕으로 감성적이고 개인적인 일기를 작성해주세요.
+    let prompt = `다음은 사진의 EXIF 데이터와 분석 결과입니다. 이 정보를 바탕으로 구체적이고 사실적인 일기를 작성해주세요.
 
 📸 사진 분석 결과:
 - 누가 (Who): ${who}
@@ -1857,12 +1857,13 @@ function createDiaryPrompt(analysisData) {
     prompt += `
 위 정보를 바탕으로 다음 조건에 맞는 일기를 작성해주세요:
 
-1. 개인적이고 감성적인 톤으로 작성
-2. 사진 속 상황과 감정을 상상하여 묘사
-3. 그 순간의 특별함과 의미를 강조
-4. 자연스럽고 따뜻한 문체 사용
+1. 구체적이고 사실적인 톤으로 작성 (과도한 감정 표현 지양)
+2. 사진에 담긴 구체적인 상황과 행동을 중심으로 묘사
+3. EXIF 데이터의 기술적 정보를 자연스럽게 언급
+4. 간결하고 명확한 문체 사용
 5. 200-300자 정도의 적당한 길이
 6. 한국어로 작성
+7. 추상적이거나 과도하게 감성적인 표현은 피하기
 
 일기 내용만 작성해주세요 (제목이나 날짜는 제외):`;
 
