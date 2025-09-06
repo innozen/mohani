@@ -50,7 +50,7 @@ exports.handler = async (event, context) => {
 
         // 요청 본문 파싱
         const requestBody = JSON.parse(event.body);
-        const { prompt } = requestBody;
+        const { prompt, image } = requestBody;
 
         if (!prompt) {
             return {
@@ -60,17 +60,40 @@ exports.handler = async (event, context) => {
             };
         }
 
-        console.log('🤖 Gemini API 호출 시작 (SDK 방식)');
+        if (!image) {
+            return {
+                statusCode: 400,
+                headers,
+                body: JSON.stringify({ error: '이미지가 필요합니다.' })
+            };
+        }
+
+        console.log('🤖 Gemini API 호출 시작 (이미지 + 텍스트)');
         console.log('📝 프롬프트 길이:', prompt.length);
+        console.log('🖼️ 이미지 Base64 길이:', image.length);
 
         // Google Gemini SDK 초기화
         const ai = new GoogleGenAI({ apiKey });
 
         try {
-            // Gemini 2.5 Flash 모델로 일기 생성
+            // Gemini 2.5 Flash 모델로 이미지와 텍스트를 함께 처리
             const response = await ai.models.generateContent({
                 model: "gemini-2.5-flash",
-                contents: prompt,
+                contents: [
+                    {
+                        parts: [
+                            {
+                                text: prompt
+                            },
+                            {
+                                inlineData: {
+                                    mimeType: "image/jpeg",
+                                    data: image
+                                }
+                            }
+                        ]
+                    }
+                ],
                 generationConfig: {
                     temperature: 0.7,
                     topK: 40,

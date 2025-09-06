@@ -74,9 +74,8 @@ header p {
     opacity: 0.95;
     font-weight: 500;
     text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
-
 
 /* Upload Section */
 .upload-section {
@@ -201,165 +200,6 @@ header p {
     box-shadow: 0 15px 40px rgba(109, 166, 212, 0.15);
     margin-bottom: 40px;
     border: 1px solid rgba(109, 166, 212, 0.1);
-}
-
-/* Diary Section */
-.diary-section {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(15px);
-    border-radius: 25px;
-    padding: 40px;
-    box-shadow: 0 15px 40px rgba(109, 166, 212, 0.15);
-    margin-bottom: 40px;
-    border: 1px solid rgba(109, 166, 212, 0.1);
-}
-
-.diary-card {
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    padding: 30px;
-    box-shadow: 0 8px 25px rgba(109, 166, 212, 0.1);
-    border: 1px solid rgba(109, 166, 212, 0.1);
-    position: relative;
-    overflow: hidden;
-}
-
-.diary-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
-    transform: scaleX(0);
-    transition: transform 0.3s ease;
-}
-
-.diary-card:hover::before {
-    transform: scaleX(1);
-}
-
-.diary-card .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
-    padding-bottom: 20px;
-    border-bottom: 2px solid rgba(109, 166, 212, 0.2);
-}
-
-.diary-card .card-header h3 {
-    font-size: 1.4rem;
-    color: #333;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 0;
-}
-
-.generate-btn {
-    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 25px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
-    position: relative;
-    overflow: hidden;
-}
-
-.generate-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s ease;
-}
-
-.generate-btn:hover::before {
-    left: 100%;
-}
-
-.generate-btn:hover {
-    background: linear-gradient(135deg, #ee5a24 0%, #ff6b6b 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
-}
-
-.generate-btn:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
-
-.diary-content {
-    min-height: 150px;
-    padding: 20px;
-    background: rgba(248, 249, 250, 0.8);
-    border-radius: 15px;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    font-size: 1rem;
-    line-height: 1.8;
-    color: #333;
-    position: relative;
-}
-
-.diary-content p {
-    margin: 0;
-    text-align: center;
-    color: #666;
-    font-style: italic;
-}
-
-.diary-content .diary-text {
-    text-align: left;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    border-left: 4px solid #ff6b6b;
-}
-
-.diary-content .loading {
-    text-align: center;
-    color: #ff6b6b;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-}
-
-.diary-content .loading::after {
-    content: '';
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border: 2px solid rgba(255, 107, 107, 0.3);
-    border-radius: 50%;
-    border-top-color: #ff6b6b;
-    animation: spin 1s ease-in-out infinite;
-}
-
-.diary-content .error {
-    color: #dc3545;
-    text-align: center;
-    padding: 15px;
-    background: #f8d7da;
-    border-radius: 8px;
-    border: 1px solid #f5c6cb;
 }
 
 .photo-preview {
@@ -710,38 +550,6 @@ footer {
         padding: 25px 20px;
         margin: 0 10px 30px 10px;
         border-radius: 20px;
-    }
-    
-    .diary-section {
-        padding: 25px 20px;
-        margin: 0 10px 30px 10px;
-        border-radius: 20px;
-    }
-    
-    .diary-card {
-        padding: 20px;
-    }
-    
-    .diary-card .card-header {
-        flex-direction: column;
-        gap: 15px;
-        align-items: stretch;
-    }
-    
-    .diary-card .card-header h3 {
-        font-size: 1.2rem;
-        text-align: center;
-    }
-    
-    .generate-btn {
-        padding: 15px 25px;
-        font-size: 1rem;
-        min-height: 48px;
-    }
-    
-    .diary-content {
-        padding: 15px;
-        font-size: 0.9rem;
     }
     
     .analysis-grid {

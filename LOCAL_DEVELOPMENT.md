@@ -142,3 +142,4 @@ netlify functions:invoke generate-diary --payload '{"prompt":"test"}'
 - GitHub Issues에 문제를 보고해주세요
 - README.md의 문제 해결 섹션을 확인해주세요
 - Netlify CLI 문서: https://docs.netlify.com/cli/get-started/
+

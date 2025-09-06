@@ -1793,8 +1793,11 @@ async function generateDiaryWithBackend() {
         // 일기 생성 프롬프트 생성
         const prompt = createDiaryPrompt();
         
-        // 백엔드 API 호출
-        const diaryText = await callBackendAPI(prompt);
+        // 현재 업로드된 사진을 Base64로 변환
+        const imageBase64 = await getImageAsBase64();
+        
+        // 백엔드 API 호출 (이미지와 프롬프트 함께 전송)
+        const diaryText = await callBackendAPI(prompt, imageBase64);
         
         // 일기 표시
         diaryContent.innerHTML = `
@@ -1816,6 +1819,29 @@ async function generateDiaryWithBackend() {
         generateDiary.disabled = false;
         generateDiary.textContent = '일기 생성하기';
     }
+}
+
+// 현재 업로드된 사진을 Base64로 변환
+async function getImageAsBase64() {
+    const fileInput = document.getElementById('fileInput');
+    if (!fileInput.files || fileInput.files.length === 0) {
+        throw new Error('업로드된 사진이 없습니다.');
+    }
+    
+    const file = fileInput.files[0];
+    
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            // data:image/jpeg;base64, 부분을 제거하고 순수 Base64만 반환
+            const base64 = e.target.result.split(',')[1];
+            resolve(base64);
+        };
+        reader.onerror = function() {
+            reject(new Error('파일 읽기 실패'));
+        };
+        reader.readAsDataURL(file);
+    });
 }
 
 // 일기 생성 프롬프트 생성
@@ -1841,8 +1867,8 @@ function createDiaryPrompt() {
 }
 
 // 백엔드 API 호출
-async function callBackendAPI(prompt) {
-    console.log('🌐 백엔드 API 호출');
+async function callBackendAPI(prompt, imageBase64) {
+    console.log('🌐 백엔드 API 호출 (이미지 포함)');
     
     const url = '/.netlify/functions/generate-diary';
     
@@ -1852,7 +1878,10 @@ async function callBackendAPI(prompt) {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ prompt })
+            body: JSON.stringify({ 
+                prompt,
+                image: imageBase64
+            })
         });
         
         if (!response.ok) {
