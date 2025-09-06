@@ -569,6 +569,7 @@ function handleFileChange(event) {
         
         // 파일을 AppState에 저장 (일기 생성 시 사용)
         AppState.currentFile = file;
+        console.log('💾 파일을 AppState에 저장:', file.name, file.type, file.size);
         
         // 파일 처리
         handleFile(file);
@@ -1754,13 +1755,17 @@ window.addEventListener('unhandledrejection', (event) => {
 // 일기 생성 버튼 처리
 function handleGenerateDiary() {
     console.log('📝 일기 생성 요청');
+    console.log('🔍 AppState.currentFile:', AppState.currentFile);
+    console.log('🔍 AppState.currentImage:', AppState.currentImage);
     
     // 파일이 업로드되었는지 확인
     if (!AppState.currentFile) {
+        console.error('❌ AppState.currentFile이 없습니다');
         alert('먼저 사진을 업로드해주세요.');
         return;
     }
     
+    console.log('✅ 파일 확인 완료, 일기 생성 시작');
     generateDiaryWithBackend();
 }
 
@@ -1832,11 +1837,16 @@ async function generateDiaryWithBackend() {
 
 // 현재 업로드된 사진을 Base64로 변환
 async function getImageAsBase64() {
+    console.log('🔄 Base64 변환 시작');
+    console.log('🔍 AppState.currentFile:', AppState.currentFile);
+    
     if (!AppState.currentFile) {
+        console.error('❌ AppState.currentFile이 없습니다');
         throw new Error('업로드된 사진이 없습니다.');
     }
     
     const file = AppState.currentFile;
+    console.log('✅ 파일 확인 완료:', file.name, file.type, file.size);
     
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
