@@ -1758,14 +1758,14 @@ function handleGenerateDiary() {
     console.log('🔍 AppState.currentFile:', AppState.currentFile);
     console.log('🔍 AppState.currentImage:', AppState.currentImage);
     
-    // 파일이 업로드되었는지 확인
-    if (!AppState.currentFile) {
-        console.error('❌ AppState.currentFile이 없습니다');
+    // 이미지가 업로드되었는지 확인 (currentImage 또는 currentFile 중 하나라도 있으면 OK)
+    if (!AppState.currentImage && !AppState.currentFile) {
+        console.error('❌ 업로드된 이미지가 없습니다');
         alert('먼저 사진을 업로드해주세요.');
         return;
     }
     
-    console.log('✅ 파일 확인 완료, 일기 생성 시작');
+    console.log('✅ 이미지 확인 완료, 일기 생성 시작');
     generateDiaryWithBackend();
 }
 
@@ -1838,15 +1838,25 @@ async function generateDiaryWithBackend() {
 // 현재 업로드된 사진을 Base64로 변환
 async function getImageAsBase64() {
     console.log('🔄 Base64 변환 시작');
+    console.log('🔍 AppState.currentImage:', AppState.currentImage);
     console.log('🔍 AppState.currentFile:', AppState.currentFile);
     
+    // currentImage가 있으면 바로 사용 (이미 Base64 형태)
+    if (AppState.currentImage) {
+        console.log('✅ currentImage 사용');
+        // data:image/jpeg;base64, 부분을 제거하고 순수 Base64만 반환
+        const base64 = AppState.currentImage.split(',')[1];
+        return base64;
+    }
+    
+    // currentImage가 없으면 currentFile 사용
     if (!AppState.currentFile) {
-        console.error('❌ AppState.currentFile이 없습니다');
+        console.error('❌ 업로드된 이미지나 파일이 없습니다');
         throw new Error('업로드된 사진이 없습니다.');
     }
     
     const file = AppState.currentFile;
-    console.log('✅ 파일 확인 완료:', file.name, file.type, file.size);
+    console.log('✅ currentFile 사용:', file.name, file.type, file.size);
     
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
