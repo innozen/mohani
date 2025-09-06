@@ -958,3 +958,119 @@ footer {
         height: 60px;
     }
 }
+
+/* 일기 생성 섹션 */
+.diary-section {
+    margin-top: 30px;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.diary-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+.diary-card .card-header {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+    color: white;
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.diary-card .card-header h3 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.generate-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.generate-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.generate-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.diary-card .card-content {
+    padding: 30px;
+}
+
+.diary-content {
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.diary-text {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #333;
+    text-align: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 15px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.diary-content .loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    color: #666;
+    padding: 40px;
+}
+
+.diary-content .error {
+    color: #e74c3c;
+    text-align: center;
+    padding: 20px;
+    background: #fdf2f2;
+    border-radius: 10px;
+    border: 1px solid #fecaca;
+}
+
+/* 모바일 대응 */
+@media (max-width: 768px) {
+    .diary-card .card-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .diary-card .card-content {
+        padding: 20px;
+    }
+    
+    .diary-text {
+        font-size: 1rem;
+        padding: 15px;
+    }
+}

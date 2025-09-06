@@ -570,9 +570,6 @@ function handleFileChange(event) {
         // 파일을 AppState에 저장 (일기 생성 시 사용)
         AppState.currentFile = file;
         
-        // 파일 입력 즉시 초기화 (중복 선택 방지)
-        event.target.value = '';
-        
         // 파일 처리
         handleFile(file);
     } else {
@@ -785,6 +782,13 @@ async function analyzeImage(file) {
             lastProcessedFile = null;
             console.log('🔄 파일 처리 기록 초기화 - 새로운 파일 선택 가능');
         }, 3000);
+        
+        // 파일 입력 초기화 (중복 선택 방지)
+        const fileInput = document.getElementById('fileInput');
+        if (fileInput) {
+            fileInput.value = '';
+            console.log('🔄 파일 입력 초기화 완료');
+        }
     }
 }
 
