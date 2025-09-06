@@ -1790,8 +1790,8 @@ async function generateDiaryWithBackend() {
     `;
     
     try {
-        // 분석 데이터를 프롬프트로 변환
-        const prompt = createDiaryPrompt(AppState.analysisData);
+        // 일기 생성 프롬프트 생성
+        const prompt = createDiaryPrompt();
         
         // 백엔드 API 호출
         const diaryText = await callBackendAPI(prompt);
@@ -1819,56 +1819,23 @@ async function generateDiaryWithBackend() {
 }
 
 // 일기 생성 프롬프트 생성
-function createDiaryPrompt(analysisData) {
-    const { exif, who, when, where, how, why } = analysisData;
-    
-    let prompt = `다음은 사진의 EXIF 데이터와 분석 결과입니다. 이 정보를 바탕으로 재미나고 귀여운 일기를 작성해주세요.
+function createDiaryPrompt() {
+    let prompt = `사진을 보고 재미나고 귀여운 일기를 작성해주세요.
 
-📸 사진 분석 결과:
-- 누가 (Who): ${who}
-- 언제 (When): ${when}
-- 어디서 (Where): ${where}
-- 어떻게 (How): ${how}
-- 왜 (Why): ${why}
+다음 조건에 맞는 일기를 작성해주세요:
 
-📋 EXIF 데이터:
-`;
-
-    // 주요 EXIF 정보 추가
-    if (exif.DateTimeOriginal) {
-        prompt += `- 촬영 시간: ${exif.DateTimeOriginal}\n`;
-    }
-    if (exif.GPSLatitude && exif.GPSLongitude) {
-        prompt += `- 위치: 위도 ${exif.GPSLatitude}, 경도 ${exif.GPSLongitude}\n`;
-    }
-    if (exif.FNumber) {
-        prompt += `- 조리개: f/${exif.FNumber}\n`;
-    }
-    if (exif.ExposureTime) {
-        prompt += `- 셔터 속도: ${exif.ExposureTime}초\n`;
-    }
-    if (exif.ISOSpeedRatings) {
-        prompt += `- ISO: ${exif.ISOSpeedRatings}\n`;
-    }
-    if (exif.Flash) {
-        prompt += `- 플래시: ${exif.Flash}\n`;
-    }
-
-    prompt += `
-위 정보를 바탕으로 다음 조건에 맞는 일기를 작성해주세요:
-
-1. 사실적인 톤으로 재미난 내용으로 작성 (과도한 감정 표현 지양)
-2. 간단하고 귀여운 감정 표현
-3. 사진에 담긴 구체적인 상황과 행동을 중심으로 묘사
-3. EXIF 데이터의 조리계 정보나 셔터 속도, ISO 등 기술적 정보를 언급하지 않음
+1. 사진에 담긴 구체적인 상황과 행동을 중심으로 묘사
+2. 사실적인 톤으로 재미난 내용으로 작성 (과도한 감정 표현 지양)
+3. 간단하고 귀여운 감정 표현
 4. 간결하고 명확한 문체 사용
 5. 200-300자 정도의 적당한 길이
 6. 한국어로 작성
 7. 사진에 보여지는 배경이나 사물들을 읽고 어떤 상황인지 분석하고 표현하기
 8. 몇명이 어디서 무엇을 했는지로 표현하기
 9. 사진에서 배경 정보를 분석해서 어떤 일들이 발생한 상황인지 리뷰하고 검토하고 일기에 추가하기
-일기 내용만 작성해주세요 (제목은 제외):`;
+10. 사진의 분위기와 색감, 조명 등을 고려하여 감정을 표현하기
 
+일기 내용만 작성해주세요 (제목은 제외):`;
 
     return prompt;
 }
