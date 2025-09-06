@@ -59,7 +59,8 @@ function initializeElements() {
         // 일기 생성 관련 요소들
         diarySection: document.getElementById('diarySection'),
         generateDiary: document.getElementById('generateDiary'),
-        diaryContent: document.getElementById('diaryContent')
+        diaryContent: document.getElementById('diaryContent'),
+        diaryKeywords: document.getElementById('diaryKeywords')
     };
     
     // 모든 요소가 존재하는지 확인
@@ -1874,9 +1875,20 @@ async function getImageAsBase64() {
 
 // 일기 생성 프롬프트 생성
 function createDiaryPrompt() {
-    let prompt = `사진을 보고 재미나고 귀여운 일기를 작성해주세요.
+    // 사용자가 입력한 키워드 가져오기
+    const keywords = AppState.elements.diaryKeywords ? AppState.elements.diaryKeywords.value.trim() : '';
+    
+    let prompt = `사진을 보고 재미나고 귀여운 일기를 작성해주세요.`;
 
-다음 조건에 맞는 일기를 작성해주세요:
+    // 키워드가 있으면 프롬프트에 추가
+    if (keywords) {
+        const keywordList = keywords.split(',').map(k => k.trim()).filter(k => k.length > 0);
+        if (keywordList.length > 0) {
+            prompt += `\n\n다음 키워드들을 자연스럽게 포함하여 일기를 작성해주세요: ${keywordList.join(', ')}`;
+        }
+    }
+
+    prompt += `\n\n다음 조건에 맞는 일기를 작성해주세요:
 
 1. 사진에 담긴 구체적인 상황과 행동을 중심으로 묘사
 2. 사실적인 톤으로 재미난 내용으로 작성 (과도한 감정 표현 지양)
@@ -1887,9 +1899,13 @@ function createDiaryPrompt() {
 7. 사진에 보여지는 배경이나 사물들을 읽고 어떤 상황인지 분석하고 표현하기
 8. 몇명이 어디서 무엇을 했는지로 표현하기
 9. 사진에서 배경 정보를 분석해서 어떤 일들이 발생한 상황인지 리뷰하고 검토하고 일기에 추가하기
-10. 사진의 분위기와 색감, 조명 등을 고려하여 감정을 표현하기
+10. 사진의 분위기와 색감, 조명 등을 고려하여 감정을 표현하기`;
 
-일기 내용만 작성해주세요 (제목은 제외):`;
+    if (keywords) {
+        prompt += `\n11. 위에서 언급된 키워드들을 자연스럽게 일기에 녹여내기`;
+    }
+
+    prompt += `\n\n일기 내용만 작성해주세요 (제목은 제외):`;
 
     return prompt;
 }
