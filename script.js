@@ -1890,8 +1890,8 @@ function handleGenerateDiary() {
     console.log('🔍 AppState.currentFile:', AppState.currentFile ? '[파일 존재]' : '[파일 없음]');
     console.log('🔍 AppState.currentImage:', AppState.currentImage ? '[이미지 존재]' : '[이미지 없음]');
     
-    // 이미지가 업로드되었는지 확인 (currentImage 또는 currentFile 중 하나라도 있으면 OK)
-    if (!AppState.currentImage && !AppState.currentFile) {
+    // 이미지가 업로드되었는지 확인 (currentFile이 있으면 재생성 가능)
+    if (!AppState.currentFile) {
         console.error('❌ 업로드된 이미지가 없습니다');
         alert('먼저 사진을 업로드해주세요.');
         return;
