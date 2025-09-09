@@ -1222,51 +1222,71 @@ footer {
 /* 모바일 대응 */
 @media (max-width: 768px) {
     .diary-card .card-header {
-        flex-direction: column;
+        flex-direction: row; /* 가로 배치로 변경 */
+        justify-content: space-between;
+        align-items: center;
         gap: 10px;
-        text-align: center;
-        padding: 16px 20px; /* 패딩 축소 */
+        text-align: left;
+        padding: 12px 16px; /* 패딩 더 축소 */
     }
     
     .diary-card .card-header h3 {
-        font-size: 1.2rem; /* 제목 크기 축소 */
+        font-size: 1.1rem; /* 제목 크기 더 축소 */
         margin: 0;
+        flex: 1; /* 남은 공간 차지 */
     }
     
     .generate-btn {
-        padding: 8px 16px; /* 버튼 크기 축소 */
-        font-size: 0.9rem;
-        border-radius: 8px;
+        padding: 6px 12px; /* 버튼 크기 더 축소 */
+        font-size: 0.85rem;
+        border-radius: 6px;
+        white-space: nowrap; /* 텍스트 줄바꿈 방지 */
     }
     
     .diary-card .card-content {
-        padding: 20px;
+        padding: 16px;
     }
     
     .diary-text {
         font-size: 1rem;
         padding: 15px;
+        max-width: none; /* 가로 길이 제한 해제 */
+    }
+    
+    /* 일기 카드 전체 너비 확장 */
+    .diary-card {
+        margin: 0 -10px; /* 좌우 마진으로 화면 활용도 증가 */
     }
 }
 
 /* 작은 모바일 화면 대응 */
 @media (max-width: 480px) {
     .diary-card .card-header {
-        padding: 12px 16px; /* 더 작은 패딩 */
+        flex-direction: row; /* 가로 배치 유지 */
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 12px; /* 더 작은 패딩 */
         gap: 8px;
     }
     
     .diary-card .card-header h3 {
-        font-size: 1.1rem; /* 더 작은 제목 */
+        font-size: 1rem; /* 더 작은 제목 */
+        flex: 1;
     }
     
     .generate-btn {
-        padding: 6px 12px; /* 더 작은 버튼 */
-        font-size: 0.85rem;
-        border-radius: 6px;
+        padding: 5px 10px; /* 더 작은 버튼 */
+        font-size: 0.8rem;
+        border-radius: 5px;
+        white-space: nowrap;
     }
     
     .diary-card .card-content {
-        padding: 16px;
+        padding: 12px;
+    }
+    
+    /* 일기 카드 전체 너비 확장 */
+    .diary-card {
+        margin: 0 -8px; /* 작은 화면에서 더 적은 마진 */
     }
 }

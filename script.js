@@ -1984,7 +1984,7 @@ async function generateDiaryWithBackend() {
     } finally {
         // 버튼 상태 복원
         generateDiary.disabled = false;
-        generateDiary.textContent = '일기 생성하기';
+        generateDiary.textContent = '일기 생성';
     }
 }
 
