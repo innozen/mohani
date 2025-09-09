@@ -219,6 +219,7 @@ header p {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 25px;
+    margin-top: 20px;
 }
 
 .analysis-card {
@@ -961,7 +962,8 @@ footer {
 
 /* 일기 생성 섹션 */
 .diary-section {
-    margin-top: 40px;
+    margin-top: 30px;
+    margin-bottom: 30px;
     animation: fadeIn 0.6s ease-out;
 }
 
@@ -1079,7 +1081,8 @@ footer {
 
 /* 키워드 입력 섹션 */
 .keyword-input-section {
-    margin-bottom: 24px;
+    margin-top: 24px;
+    margin-bottom: 0;
     padding: 20px;
     background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
     border-radius: 16px;

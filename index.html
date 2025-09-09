@@ -6,8 +6,14 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+    <!-- 보안 헤더 -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://justadudewhohacks.github.io; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://nominatim.openstreetmap.org; frame-ancestors 'none';">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
     <title>너네 모하니 - 사진 분석</title>
-    <link rel="stylesheet" href="styles.css?v=026">
+    <link rel="stylesheet" href="styles.css?v=029">
     <!-- EXIF 라이브러리 (여러 CDN 시도) -->
     <script src="https://cdn.jsdelivr.net/npm/exif-js@2.3.0/exif.js" 
             onerror="this.onerror=null; this.src='https://unpkg.com/exif-js@2.3.0/exif.js'"></script>
@@ -43,6 +49,37 @@
                     <img id="previewImage" alt="업로드된 사진">
                 </div>
 
+                <!-- AI 일기 생성 영역 (사진 바로 아래) -->
+                <div class="diary-section" id="diarySection" style="display: none;">
+                    <div class="diary-card">
+                        <div class="card-header">
+                            <h3>📝 AI 일기 생성</h3>
+                            <button id="generateDiary" class="generate-btn">일기 생성하기</button>
+                        </div>
+                        <div class="card-content">
+                            <div class="diary-content" id="diaryContent">
+                                <p>사진 분석이 완료되면 AI가 자동으로 일기를 작성해드립니다.</p>
+                            </div>
+                            <div class="keyword-input-section">
+                                <label for="diaryKeywords" class="keyword-label">
+                                    ✨ 일기에 포함하고 싶은 키워드 (선택사항)
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="diaryKeywords" 
+                                    class="keyword-input" 
+                                    placeholder="예: 행복한, 즐거운, 특별한, 감동적인..."
+                                    maxlength="100"
+                                >
+                                <div class="keyword-hint">
+                                    쉼표로 구분하여 여러 키워드를 입력할 수 있습니다
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EXIF 분석 정보 (일기 생성 아래) -->
                 <div class="analysis-grid">
                     <div class="analysis-card" id="whoCard">
                         <div class="card-header">
@@ -100,43 +137,14 @@
                     </div>
                 </div>
             </div>
-
-            <div class="diary-section" id="diarySection" style="display: none;">
-                <div class="diary-card">
-                    <div class="card-header">
-                        <h3>📝 AI 일기 생성</h3>
-                        <button id="generateDiary" class="generate-btn">일기 생성하기</button>
-                    </div>
-                    <div class="card-content">
-                        <div class="keyword-input-section">
-                            <label for="diaryKeywords" class="keyword-label">
-                                ✨ 일기에 포함하고 싶은 키워드 (선택사항)
-                            </label>
-                            <input 
-                                type="text" 
-                                id="diaryKeywords" 
-                                class="keyword-input" 
-                                placeholder="예: 행복한, 즐거운, 특별한, 감동적인..."
-                                maxlength="100"
-                            >
-                            <div class="keyword-hint">
-                                쉼표로 구분하여 여러 키워드를 입력할 수 있습니다
-                            </div>
-                        </div>
-                        <div class="diary-content" id="diaryContent">
-                            <p>사진 분석이 완료되면 AI가 자동으로 일기를 작성해드립니다.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </main>
 
         <footer>
-            <p>© 2024 너네 모하니 - 사진 분석</p>
-            <p class="version-info">v0.026</p>
+            <p>© 2025 너네 모하니 - 사진 분석(BETA)</p>
+            <p class="version-info">v0.029</p>
         </footer>
     </div>
 
-    <script src="script.js?v=026"></script>
+    <script src="script.js?v=029"></script>
 </body>
 </html>

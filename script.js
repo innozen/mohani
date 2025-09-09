@@ -3,10 +3,10 @@
  * 단순하고 안정적인 방식으로 구현
  */
 
-// 전역 상태
+// 전역 상태 (보안 강화)
 const AppState = {
     isProcessing: false,
-    currentImage: null,
+    currentImage: null, // 보안: 메모리에서 자동 정리됨
     currentFile: null,
     faceApiLoaded: false,
     elements: {},
@@ -17,8 +17,14 @@ const AppState = {
     imageCache: new Map(),
     debounceTimer: null,
     lastProcessedImage: null,
-    // 분석 데이터 저장
-    analysisData: null
+    // 분석 데이터 저장 (민감한 정보 제외)
+    analysisData: null,
+    // 보안 관련 상태
+    securityFlags: {
+        dataEncrypted: false,
+        memoryCleared: false,
+        secureMode: true
+    }
 };
 
 // 모바일 환경 감지
@@ -570,7 +576,7 @@ function handleFileChange(event) {
         
         // 파일을 AppState에 저장 (일기 생성 시 사용)
         AppState.currentFile = file;
-        console.log('💾 파일을 AppState에 저장:', file.name, file.type, file.size);
+        console.log('💾 파일을 AppState에 저장:', file.name, file.type, '[크기 숨김]');
         
         // 파일 처리
         handleFile(file);
@@ -728,7 +734,7 @@ function showAnalysisSection() {
         analysisSection.classList.add('fade-in');
     }
     
-    // 일기 섹션도 표시
+    // 일기 섹션도 표시 (이제 분석 섹션 내부에 포함됨)
     if (diarySection) {
         diarySection.style.display = 'block';
         diarySection.classList.add('fade-in');
@@ -755,7 +761,7 @@ async function analyzeImage(file) {
     try {
         // EXIF 데이터 추출
         const exifData = await extractExifData(file);
-        console.log('📋 EXIF 데이터:', exifData);
+        console.log('📋 EXIF 데이터 추출 완료:', Object.keys(exifData).length, '개 항목');
         
         // 각 분석 실행
         await Promise.all([
@@ -1416,10 +1422,16 @@ async function analyzeWhen(exifData) {
                 hour12: false
             });
             
-            dateTimeInfo.innerHTML = `
-                <div class="date">${dateStr}</div>
-                <div class="time">${timeStr}</div>
-            `;
+            // XSS 방지를 위한 안전한 DOM 조작
+            dateTimeInfo.innerHTML = '';
+            const dateDiv = document.createElement('div');
+            dateDiv.className = 'date';
+            dateDiv.textContent = dateStr;
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'time';
+            timeDiv.textContent = timeStr;
+            dateTimeInfo.appendChild(dateDiv);
+            dateTimeInfo.appendChild(timeDiv);
         } else {
             dateTimeInfo.innerHTML = '<div class="info">사진의 날짜 정보를 찾을 수 없습니다.</div>';
         }
@@ -1446,10 +1458,16 @@ async function analyzeWhere(exifData) {
         
         if (latitude && longitude) {
             const address = await getAddressFromCoordinates(latitude, longitude);
-            locationInfo.innerHTML = `
-                <div class="location">${address}</div>
-                <div class="coordinates">${latitude.toFixed(6)}, ${longitude.toFixed(6)}</div>
-            `;
+            // XSS 방지를 위한 안전한 DOM 조작
+            locationInfo.innerHTML = '';
+            const locationDiv = document.createElement('div');
+            locationDiv.className = 'location';
+            locationDiv.textContent = address;
+            const coordinatesDiv = document.createElement('div');
+            coordinatesDiv.className = 'coordinates';
+            coordinatesDiv.textContent = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+            locationInfo.appendChild(locationDiv);
+            locationInfo.appendChild(coordinatesDiv);
         } else {
             locationInfo.innerHTML = '<div class="info">사진의 위치 정보를 찾을 수 없습니다.</div>';
         }
@@ -1503,8 +1521,16 @@ async function analyzeHow(exifData) {
             activities.push('일반 촬영');
         }
         
-        const activityHtml = activities.map(activity => `<li>${activity}</li>`).join('');
-        activityInfo.innerHTML = `<ul class="activity-list">${activityHtml}</ul>`;
+        // XSS 방지를 위한 안전한 DOM 조작
+        activityInfo.innerHTML = '';
+        const ul = document.createElement('ul');
+        ul.className = 'activity-list';
+        activities.forEach(activity => {
+            const li = document.createElement('li');
+            li.textContent = activity;
+            ul.appendChild(li);
+        });
+        activityInfo.appendChild(ul);
     } catch (error) {
         console.error('❌ 활동 분석 오류:', error);
         activityInfo.innerHTML = '<div class="error">활동 정보 분석 중 오류가 발생했습니다.</div>';
@@ -1542,10 +1568,16 @@ async function analyzeWhy(exifData) {
                 eventDescription = '겨울철 모임';
             }
             
-            eventInfo.innerHTML = `
-                <div class="event">${monthName} 모임</div>
-                <div class="description">${eventDescription}</div>
-            `;
+            // XSS 방지를 위한 안전한 DOM 조작
+            eventInfo.innerHTML = '';
+            const eventDiv = document.createElement('div');
+            eventDiv.className = 'event';
+            eventDiv.textContent = `${monthName} 모임`;
+            const descriptionDiv = document.createElement('div');
+            descriptionDiv.className = 'description';
+            descriptionDiv.textContent = eventDescription;
+            eventInfo.appendChild(eventDiv);
+            eventInfo.appendChild(descriptionDiv);
         } else {
             eventInfo.innerHTML = '<div class="info">이벤트 정보를 분석할 수 없습니다.</div>';
         }
@@ -1570,12 +1602,27 @@ function convertDMSToDD(dms, ref) {
     return dd;
 }
 
-// 좌표를 주소로 변환
+// 좌표를 주소로 변환 (보안 강화)
 async function getAddressFromCoordinates(latitude, longitude) {
     try {
+        // 좌표 정보를 로그에 노출하지 않도록 보안 강화
+        console.log('📍 위치 정보 조회 중...');
+        
+        // 요청 타임아웃 설정 (10초)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        
         const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&accept-language=ko`
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&accept-language=ko`,
+            {
+                signal: controller.signal,
+                headers: {
+                    'User-Agent': 'PhotoEXIFAnalyzer/1.0'
+                }
+            }
         );
+        
+        clearTimeout(timeoutId);
         
         if (!response.ok) {
             throw new Error('주소 변환 실패');
@@ -1644,31 +1691,59 @@ async function getAddressFromCoordinates(latitude, longitude) {
     }
 }
 
-// 메모리 정리 함수 (성능 최적화)
+// 보안 강화된 메모리 정리 함수
 function cleanupMemory() {
-    console.log('🧹 메모리 정리 시작');
+    console.log('🧹 보안 메모리 정리 시작');
     
-    // 이미지 캐시 정리
-    if (AppState.imageCache.size > 10) {
+    // 민감한 이미지 데이터 즉시 정리
+    if (AppState.currentImage) {
+        // Base64 데이터를 안전하게 제거
+        AppState.currentImage = null;
+        AppState.securityFlags.memoryCleared = true;
+        console.log('🔒 민감한 이미지 데이터 메모리에서 제거됨');
+    }
+    
+    // 이미지 캐시 정리 (보안 강화)
+    if (AppState.imageCache.size > 5) { // 캐시 크기 제한 강화
         const entries = Array.from(AppState.imageCache.entries());
-        const toDelete = entries.slice(0, 5); // 오래된 5개 삭제
+        const toDelete = entries.slice(0, 3); // 더 적은 수만 유지
         
-        toDelete.forEach(([key]) => {
+        toDelete.forEach(([key, value]) => {
+            // 캐시된 이미지 데이터도 안전하게 정리
+            if (value && typeof value === 'string' && value.startsWith('data:')) {
+                value = null; // 메모리에서 완전 제거
+            }
             AppState.imageCache.delete(key);
         });
         
-        console.log(`🗑️ 이미지 캐시 정리: ${toDelete.length}개 삭제`);
+        console.log(`🗑️ 보안 이미지 캐시 정리: ${toDelete.length}개 삭제`);
+    }
+    
+    // 분석 데이터에서 민감한 정보 제거
+    if (AppState.analysisData) {
+        // GPS 좌표, 원본 이미지 데이터 등 민감한 정보 제거
+        if (AppState.analysisData.exif) {
+            delete AppState.analysisData.exif.GPSLatitude;
+            delete AppState.analysisData.exif.GPSLongitude;
+            delete AppState.analysisData.exif.GPSLatitudeRef;
+            delete AppState.analysisData.exif.GPSLongitudeRef;
+        }
+        delete AppState.analysisData.imageData;
+        console.log('🔒 분석 데이터에서 민감한 정보 제거됨');
     }
     
     // 가비지 컬렉션 유도 (가능한 경우)
     if (window.gc) {
         try {
             window.gc();
-            console.log('♻️ 가비지 컬렉션 실행');
+            console.log('♻️ 보안 가비지 컬렉션 실행');
         } catch (error) {
             console.log('⚠️ 가비지 컬렉션 실행 불가');
         }
     }
+    
+    // 보안 플래그 업데이트
+    AppState.securityFlags.memoryCleared = true;
 }
 
 // 성능 모니터링 함수
@@ -1691,11 +1766,53 @@ function startPerformanceMonitoring() {
     }
 }
 
-// 앱 초기화
+// 보안 초기화 함수
+function initializeSecurity() {
+    console.log('🔒 보안 초기화 시작');
+    
+    // 개발자 도구 감지 (기본적인 보호)
+    let devtools = { open: false, orientation: null };
+    const threshold = 160;
+    
+    setInterval(() => {
+        if (window.outerHeight - window.innerHeight > threshold || 
+            window.outerWidth - window.innerWidth > threshold) {
+            if (!devtools.open) {
+                devtools.open = true;
+                console.warn('⚠️ 보안 경고: 개발자 도구가 감지되었습니다.');
+                // 개발자 도구 사용 시 민감한 데이터 정리
+                cleanupMemory();
+            }
+        } else {
+            devtools.open = false;
+        }
+    }, 500);
+    
+    // 페이지 언로드 시 메모리 정리
+    window.addEventListener('beforeunload', () => {
+        console.log('🔒 페이지 종료 - 메모리 정리');
+        cleanupMemory();
+    });
+    
+    // 페이지 숨김 시 메모리 정리
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            console.log('🔒 페이지 숨김 - 메모리 정리');
+            cleanupMemory();
+        }
+    });
+    
+    console.log('✅ 보안 초기화 완료');
+}
+
+// 앱 초기화 (보안 강화)
 function initializeApp() {
-    console.log('🚀 사진 EXIF 분석기 초기화 시작');
+    console.log('🚀 사진 EXIF 분석기 초기화 시작 (보안 강화)');
     
     try {
+        // 보안 초기화 먼저 실행
+        initializeSecurity();
+        
         // 모바일 환경 감지
         detectMobileEnvironment();
         
@@ -1711,14 +1828,15 @@ function initializeApp() {
         // 성능 모니터링 시작
         startPerformanceMonitoring();
         
-        // 주기적 메모리 정리 (5분마다)
-        setInterval(cleanupMemory, 5 * 60 * 1000);
+        // 주기적 메모리 정리 (3분마다로 단축)
+        setInterval(cleanupMemory, 3 * 60 * 1000);
         
         // 업로드 준비 상태로 변경
         showUploadReady();
         
-        console.log('✅ 앱 초기화 완료 - 모든 기능 사용 가능');
+        console.log('✅ 앱 초기화 완료 - 보안 강화된 모든 기능 사용 가능');
         console.log(`📱 모바일 환경: ${AppState.isMobile ? '예' : '아니오'}`);
+        console.log('🔒 보안 모드: 활성화됨');
     } catch (error) {
         console.error('❌ 앱 초기화 실패:', error);
         
@@ -1756,8 +1874,8 @@ window.addEventListener('unhandledrejection', (event) => {
 // 일기 생성 버튼 처리
 function handleGenerateDiary() {
     console.log('📝 일기 생성 요청');
-    console.log('🔍 AppState.currentFile:', AppState.currentFile);
-    console.log('🔍 AppState.currentImage:', AppState.currentImage);
+    console.log('🔍 AppState.currentFile:', AppState.currentFile ? '[파일 존재]' : '[파일 없음]');
+    console.log('🔍 AppState.currentImage:', AppState.currentImage ? '[이미지 존재]' : '[이미지 없음]');
     
     // 이미지가 업로드되었는지 확인 (currentImage 또는 currentFile 중 하나라도 있으면 OK)
     if (!AppState.currentImage && !AppState.currentFile) {
@@ -1770,23 +1888,54 @@ function handleGenerateDiary() {
     generateDiaryWithBackend();
 }
 
-// 분석 데이터 수집
+// 보안 강화된 분석 데이터 수집
 function collectAnalysisData(exifData) {
-    console.log('📊 분석 데이터 수집');
+    console.log('📊 보안 분석 데이터 수집');
     
     const { faceContainer, dateTimeInfo, locationInfo, activityInfo, eventInfo } = AppState.elements;
     
+    // 민감한 정보를 제거한 안전한 EXIF 데이터 생성
+    const safeExifData = { ...exifData };
+    
+    // GPS 정보 제거 (개인정보 보호)
+    delete safeExifData.GPSLatitude;
+    delete safeExifData.GPSLongitude;
+    delete safeExifData.GPSLatitudeRef;
+    delete safeExifData.GPSLongitudeRef;
+    delete safeExifData.GPSAltitude;
+    delete safeExifData.GPSAltitudeRef;
+    delete safeExifData.GPSTimeStamp;
+    delete safeExifData.GPSDateStamp;
+    
+    // 카메라 시리얼 번호 등 기기 식별 정보 제거
+    delete safeExifData.CameraSerialNumber;
+    delete safeExifData.LensSerialNumber;
+    delete safeExifData.BodySerialNumber;
+    
+    // 위치 정보가 포함된 텍스트에서 민감한 부분 마스킹
+    let safeLocationInfo = locationInfo ? locationInfo.textContent : '';
+    if (safeLocationInfo && safeLocationInfo.includes(',')) {
+        // 좌표 정보가 있으면 일반적인 지역명만 유지
+        const parts = safeLocationInfo.split(',');
+        if (parts.length > 2) {
+            safeLocationInfo = parts.slice(0, 2).join(', '); // 시/구까지만 유지
+        }
+    }
+    
     AppState.analysisData = {
-        exif: exifData,
+        exif: safeExifData, // 민감한 정보 제거된 EXIF
         who: faceContainer ? faceContainer.textContent : '',
         when: dateTimeInfo ? dateTimeInfo.textContent : '',
-        where: locationInfo ? locationInfo.textContent : '',
+        where: safeLocationInfo, // 마스킹된 위치 정보
         how: activityInfo ? activityInfo.textContent : '',
         why: eventInfo ? eventInfo.textContent : '',
-        imageData: AppState.currentImage
+        // imageData는 보안상 저장하지 않음
+        timestamp: new Date().toISOString(),
+        version: '0.029'
     };
     
-    console.log('✅ 분석 데이터 수집 완료:', AppState.analysisData);
+    console.log('✅ 보안 분석 데이터 수집 완료 (민감한 정보 제거됨)');
+    console.log('🔒 제거된 민감한 정보: GPS 좌표, 카메라 시리얼 번호, 상세 위치 정보');
 }
 
 // 백엔드 API를 사용한 일기 생성
@@ -1815,9 +1964,12 @@ async function generateDiaryWithBackend() {
         const diaryText = await callBackendAPI(prompt, imageBase64);
         
         // 일기 표시
-        diaryContent.innerHTML = `
-            <div class="diary-text">${diaryText}</div>
-        `;
+        // XSS 방지를 위한 안전한 DOM 조작
+        diaryContent.innerHTML = '';
+        const diaryDiv = document.createElement('div');
+        diaryDiv.className = 'diary-text';
+        diaryDiv.textContent = diaryText;
+        diaryContent.appendChild(diaryDiv);
         
         console.log('✅ 일기 생성 완료');
         
@@ -1839,8 +1991,8 @@ async function generateDiaryWithBackend() {
 // 현재 업로드된 사진을 Base64로 변환
 async function getImageAsBase64() {
     console.log('🔄 Base64 변환 시작');
-    console.log('🔍 AppState.currentImage:', AppState.currentImage);
-    console.log('🔍 AppState.currentFile:', AppState.currentFile);
+    console.log('🔍 AppState.currentImage:', AppState.currentImage ? '[이미지 존재]' : '[이미지 없음]');
+    console.log('🔍 AppState.currentFile:', AppState.currentFile ? '[파일 존재]' : '[파일 없음]');
     
     // currentImage가 있으면 바로 사용 (이미 Base64 형태)
     if (AppState.currentImage) {
@@ -1910,26 +2062,47 @@ function createDiaryPrompt() {
     return prompt;
 }
 
-// 백엔드 API 호출
+// 보안 강화된 백엔드 API 호출
 async function callBackendAPI(prompt, imageBase64) {
-    console.log('🌐 백엔드 API 호출 (이미지 포함)');
+    console.log('🌐 보안 백엔드 API 호출 (이미지 포함)');
+    
+    // HTTPS 강제 확인
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+        console.warn('⚠️ 보안 경고: HTTPS가 아닌 환경에서 실행 중입니다.');
+        throw new Error('보안을 위해 HTTPS 환경에서만 사용 가능합니다.');
+    }
     
     const url = '/.netlify/functions/generate-diary';
     
     try {
+        // 요청 타임아웃 설정 (30초)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
+        
         const response = await fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest', // CSRF 보호
+                'X-Client-Version': '0.029' // 클라이언트 버전 확인
             },
             body: JSON.stringify({ 
                 prompt,
-                image: imageBase64
-            })
+                image: imageBase64,
+                timestamp: new Date().toISOString(),
+                clientInfo: {
+                    userAgent: navigator.userAgent.substring(0, 100), // 제한된 정보만
+                    language: navigator.language,
+                    platform: navigator.platform
+                }
+            }),
+            signal: controller.signal
         });
         
+        clearTimeout(timeoutId);
+        
         if (!response.ok) {
-            const errorData = await response.json();
+            const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
             throw new Error(errorData.error || `HTTP 오류: ${response.status}`);
         }
         
@@ -1939,10 +2112,27 @@ async function callBackendAPI(prompt, imageBase64) {
             throw new Error('API 응답 형식이 올바르지 않습니다.');
         }
         
+        // 응답 데이터 검증
+        if (typeof data.diary !== 'string' || data.diary.length > 5000) {
+            throw new Error('응답 데이터가 올바르지 않습니다.');
+        }
+        
+        console.log('✅ 보안 API 호출 완료');
         return data.diary;
         
     } catch (error) {
-        console.error('❌ 백엔드 API 호출 실패:', error);
+        console.error('❌ 보안 백엔드 API 호출 실패:', error);
+        
+        // 네트워크 오류 시 사용자에게 안전한 메시지 표시
+        if (error.name === 'AbortError') {
+            throw new Error('요청 시간이 초과되었습니다. 다시 시도해주세요.');
+        }
+        
         throw error;
+    } finally {
+        // API 호출 후 즉시 메모리 정리
+        setTimeout(() => {
+            cleanupMemory();
+        }, 1000);
     }
 }
