@@ -13,13 +13,16 @@
     <meta http-equiv="X-XSS-Protection" content="1; mode=block">
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
     <title>너네 모하니 - 사진 분석</title>
-    <link rel="stylesheet" href="styles.css?v=032">
+    <link rel="stylesheet" href="styles.css?v=033">
     <!-- EXIF 라이브러리 (여러 CDN 시도) -->
     <script src="https://cdn.jsdelivr.net/npm/exif-js@2.3.0/exif.js" 
             onerror="this.onerror=null; this.src='https://unpkg.com/exif-js@2.3.0/exif.js'"></script>
     
     <!-- Face-api.js (가장 안정적이고 가벼운 얼굴 인식 라이브러리) -->
     <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    
+    <!-- html2canvas (화면 캡처 라이브러리) -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -136,15 +139,22 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- 화면 저장 버튼 -->
+                <div class="save-section" id="saveSection" style="display: none;">
+                    <button id="saveScreenBtn" class="save-screen-btn">
+                        📸 화면 저장하기
+                    </button>
+                </div>
             </div>
         </main>
 
         <footer>
             <p>© 2025 너네 모하니 - 사진 분석(BETA)</p>
-            <p class="version-info">v0.032</p>
+            <p class="version-info">v0.033</p>
         </footer>
     </div>
 
-    <script src="script.js?v=032"></script>
+    <script src="script.js?v=033"></script>
 </body>
 </html>

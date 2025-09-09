@@ -66,7 +66,10 @@ function initializeElements() {
         diarySection: document.getElementById('diarySection'),
         generateDiary: document.getElementById('generateDiary'),
         diaryContent: document.getElementById('diaryContent'),
-        diaryKeywords: document.getElementById('diaryKeywords')
+        diaryKeywords: document.getElementById('diaryKeywords'),
+        // 화면 저장 관련 요소들
+        saveSection: document.getElementById('saveSection'),
+        saveScreenBtn: document.getElementById('saveScreenBtn')
     };
     
     // 모든 요소가 존재하는지 확인
@@ -253,13 +256,14 @@ function showUploadReady() {
 function setupEventListeners() {
     console.log('🎯 이벤트 리스너 설정');
     
-    const { uploadArea, fileInput, uploadBtn, generateDiary } = AppState.elements;
+    const { uploadArea, fileInput, uploadBtn, generateDiary, saveScreenBtn } = AppState.elements;
     
     // 모든 기존 이벤트 리스너 제거
     uploadArea.removeEventListener('click', handleUploadAreaClick);
     uploadBtn.removeEventListener('click', handleUploadButtonClick);
     fileInput.removeEventListener('change', handleFileChange);
     generateDiary.removeEventListener('click', handleGenerateDiary);
+    saveScreenBtn.removeEventListener('click', handleSaveScreen);
     
     // 파일 입력 변경 이벤트
     fileInput.addEventListener('change', handleFileChange);
@@ -272,6 +276,9 @@ function setupEventListeners() {
     
     // 일기 생성 버튼 이벤트
     generateDiary.addEventListener('click', handleGenerateDiary);
+    
+    // 화면 저장 버튼 이벤트
+    saveScreenBtn.addEventListener('click', handleSaveScreen);
     
     // 드래그 앤 드롭 이벤트
     uploadArea.addEventListener('dragover', handleDragOver);
@@ -728,7 +735,7 @@ async function handleFile(file) {
 function showAnalysisSection() {
     console.log('📊 분석 섹션 표시');
     
-    const { analysisSection, diarySection } = AppState.elements;
+    const { analysisSection, diarySection, saveSection } = AppState.elements;
     if (analysisSection) {
         analysisSection.style.display = 'block';
         analysisSection.classList.add('fade-in');
@@ -738,6 +745,12 @@ function showAnalysisSection() {
     if (diarySection) {
         diarySection.style.display = 'block';
         diarySection.classList.add('fade-in');
+    }
+    
+    // 화면 저장 섹션도 표시
+    if (saveSection) {
+        saveSection.style.display = 'block';
+        saveSection.classList.add('fade-in');
     }
 }
 
@@ -2134,5 +2147,96 @@ async function callBackendAPI(prompt, imageBase64) {
         setTimeout(() => {
             cleanupMemory();
         }, 1000);
+    }
+}
+
+// 화면 저장 기능
+async function handleSaveScreen() {
+    console.log('📸 화면 저장 시작');
+    
+    const { saveScreenBtn } = AppState.elements;
+    
+    try {
+        // 버튼 비활성화 및 로딩 상태 표시
+        saveScreenBtn.disabled = true;
+        saveScreenBtn.textContent = '📸 저장 중...';
+        
+        // 사진 영역부터 최하단까지 캡처할 요소들 찾기
+        const photoPreview = document.querySelector('.photo-preview');
+        const analysisSection = document.getElementById('analysisSection');
+        const saveSection = document.getElementById('saveSection');
+        
+        if (!photoPreview || !analysisSection) {
+            throw new Error('캡처할 요소를 찾을 수 없습니다.');
+        }
+        
+        // 캡처할 영역의 경계 계산
+        const photoRect = photoPreview.getBoundingClientRect();
+        const analysisRect = analysisSection.getBoundingClientRect();
+        const saveRect = saveSection.getBoundingClientRect();
+        
+        // 캡처 영역 설정 (사진부터 화면 저장 버튼까지)
+        const captureArea = {
+            x: Math.min(photoRect.left, analysisRect.left),
+            y: photoRect.top,
+            width: Math.max(photoRect.width, analysisRect.width),
+            height: saveRect.bottom - photoRect.top
+        };
+        
+        console.log('📐 캡처 영역:', captureArea);
+        
+        // html2canvas를 사용한 화면 캡처
+        const canvas = await html2canvas(document.body, {
+            x: captureArea.x,
+            y: captureArea.y,
+            width: captureArea.width,
+            height: captureArea.height,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff',
+            scale: 2, // 고해상도 캡처
+            logging: false
+        });
+        
+        // 캔버스를 Blob으로 변환
+        const blob = await new Promise(resolve => {
+            canvas.toBlob(resolve, 'image/png', 0.9);
+        });
+        
+        // 파일명 생성 (현재 날짜/시간 포함)
+        const now = new Date();
+        const timestamp = now.toISOString().replace(/[:.]/g, '-').slice(0, 19);
+        const filename = `photo-analysis-${timestamp}.png`;
+        
+        // 파일 다운로드
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        console.log('✅ 화면 저장 완료:', filename);
+        
+        // 성공 메시지 표시
+        saveScreenBtn.textContent = '✅ 저장 완료!';
+        setTimeout(() => {
+            saveScreenBtn.textContent = '📸 화면 저장하기';
+            saveScreenBtn.disabled = false;
+        }, 2000);
+        
+    } catch (error) {
+        console.error('❌ 화면 저장 실패:', error);
+        
+        // 오류 메시지 표시
+        saveScreenBtn.textContent = '❌ 저장 실패';
+        setTimeout(() => {
+            saveScreenBtn.textContent = '📸 화면 저장하기';
+            saveScreenBtn.disabled = false;
+        }, 2000);
+        
+        alert('화면 저장 중 오류가 발생했습니다: ' + error.message);
     }
 }
