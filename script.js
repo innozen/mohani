@@ -1707,6 +1707,10 @@ async function getAddressFromCoordinates(latitude, longitude) {
 // 보안 강화된 메모리 정리 함수
 function cleanupMemory() {
     console.log('🧹 보안 메모리 정리 시작');
+    console.log('🔍 정리 전 상태:', {
+        currentFile: AppState.currentFile ? '[파일 존재]' : '[파일 없음]',
+        currentImage: AppState.currentImage ? '[이미지 존재]' : '[이미지 없음]'
+    });
     
     // 민감한 이미지 데이터 즉시 정리
     if (AppState.currentImage) {
@@ -1715,6 +1719,9 @@ function cleanupMemory() {
         AppState.securityFlags.memoryCleared = true;
         console.log('🔒 민감한 이미지 데이터 메모리에서 제거됨');
     }
+    
+    // currentFile은 보존 (재생성을 위해)
+    console.log('🔒 currentFile 보존됨 (재생성 가능)');
     
     // 이미지 캐시 정리 (보안 강화)
     if (AppState.imageCache.size > 5) { // 캐시 크기 제한 강화
@@ -1890,9 +1897,23 @@ function handleGenerateDiary() {
     console.log('🔍 AppState.currentFile:', AppState.currentFile ? '[파일 존재]' : '[파일 없음]');
     console.log('🔍 AppState.currentImage:', AppState.currentImage ? '[이미지 존재]' : '[이미지 없음]');
     
+    // currentFile이 실제로 존재하는지 더 자세히 확인
+    if (AppState.currentFile) {
+        console.log('📁 currentFile 상세 정보:', {
+            name: AppState.currentFile.name,
+            type: AppState.currentFile.type,
+            size: AppState.currentFile.size
+        });
+    }
+    
     // 이미지가 업로드되었는지 확인 (currentFile이 있으면 재생성 가능)
     if (!AppState.currentFile) {
         console.error('❌ 업로드된 이미지가 없습니다');
+        console.log('🔍 AppState 전체 상태:', {
+            currentFile: AppState.currentFile,
+            currentImage: AppState.currentImage ? '[이미지 존재]' : '[이미지 없음]',
+            isProcessing: AppState.isProcessing
+        });
         alert('먼저 사진을 업로드해주세요.');
         return;
     }
