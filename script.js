@@ -2161,41 +2161,18 @@ async function handleSaveScreen() {
         saveScreenBtn.disabled = true;
         saveScreenBtn.textContent = '📸 저장 중...';
         
-        // 사진 영역부터 최하단까지 캡처할 요소들 찾기
-        const photoPreview = document.querySelector('.photo-preview');
-        const analysisSection = document.getElementById('analysisSection');
-        const saveSection = document.getElementById('saveSection');
+        // 전체 화면 캡처 (결과 페이지 전체)
+        console.log('📐 전체 화면 캡처 시작');
         
-        if (!photoPreview || !analysisSection) {
-            throw new Error('캡처할 요소를 찾을 수 없습니다.');
-        }
-        
-        // 캡처할 영역의 경계 계산
-        const photoRect = photoPreview.getBoundingClientRect();
-        const analysisRect = analysisSection.getBoundingClientRect();
-        const saveRect = saveSection.getBoundingClientRect();
-        
-        // 캡처 영역 설정 (사진부터 화면 저장 버튼까지)
-        const captureArea = {
-            x: Math.min(photoRect.left, analysisRect.left),
-            y: photoRect.top,
-            width: Math.max(photoRect.width, analysisRect.width),
-            height: saveRect.bottom - photoRect.top
-        };
-        
-        console.log('📐 캡처 영역:', captureArea);
-        
-        // html2canvas를 사용한 화면 캡처
+        // html2canvas를 사용한 전체 화면 캡처
         const canvas = await html2canvas(document.body, {
-            x: captureArea.x,
-            y: captureArea.y,
-            width: captureArea.width,
-            height: captureArea.height,
             useCORS: true,
             allowTaint: true,
             backgroundColor: '#ffffff',
             scale: 2, // 고해상도 캡처
-            logging: false
+            logging: false,
+            height: window.innerHeight,
+            width: window.innerWidth
         });
         
         // 캔버스를 Blob으로 변환
