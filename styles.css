@@ -504,6 +504,11 @@ footer {
         padding: 15px;
     }
     
+    /* 일기 생성 영역만 패딩 제거 */
+    .diary-section .container {
+        padding: 0;
+    }
+    
     header h1 {
         font-size: 2.2rem;
         margin-bottom: 15px;
@@ -599,6 +604,11 @@ footer {
 @media (max-width: 480px) {
     .container {
         padding: 10px;
+    }
+    
+    /* 일기 생성 영역만 패딩 제거 */
+    .diary-section .container {
+        padding: 0;
     }
     
     header h1 {
@@ -1253,9 +1263,21 @@ footer {
         max-width: none; /* 가로 길이 제한 해제 */
     }
     
-    /* 일기 카드 전체 너비 확장 */
+    /* 일기 카드 전체 너비 확장 - 화면 가장자리까지 */
     .diary-card {
-        margin: 0 -10px; /* 좌우 마진으로 화면 활용도 증가 */
+        margin: 0 -20px; /* 더 큰 마진으로 화면 활용도 극대화 */
+        width: calc(100vw - 30px); /* 뷰포트 너비 기준으로 설정 */
+        max-width: none; /* 최대 너비 제한 해제 */
+        border-radius: 16px; /* 모바일에서 더 작은 둥근 모서리 */
+        position: relative;
+        left: 50%;
+        transform: translateX(-50%); /* 중앙 정렬 유지 */
+    }
+    
+    /* 일기 섹션 자체도 확장 */
+    .diary-section {
+        margin: 0 -20px; /* 섹션 레벨에서도 확장 */
+        overflow: hidden; /* 넘치는 부분 숨김 */
     }
 }
 
@@ -1285,8 +1307,20 @@ footer {
         padding: 12px;
     }
     
-    /* 일기 카드 전체 너비 확장 */
+    /* 일기 카드 전체 너비 확장 - 화면 가장자리까지 */
     .diary-card {
-        margin: 0 -8px; /* 작은 화면에서 더 적은 마진 */
+        margin: 0 -15px; /* 작은 화면에서도 큰 마진 */
+        width: calc(100vw - 20px); /* 뷰포트 너비 기준으로 설정 */
+        max-width: none; /* 최대 너비 제한 해제 */
+        border-radius: 12px; /* 더 작은 둥근 모서리 */
+        position: relative;
+        left: 50%;
+        transform: translateX(-50%); /* 중앙 정렬 유지 */
+    }
+    
+    /* 일기 섹션 자체도 확장 */
+    .diary-section {
+        margin: 0 -15px; /* 섹션 레벨에서도 확장 */
+        overflow: hidden; /* 넘치는 부분 숨김 */
     }
 }
