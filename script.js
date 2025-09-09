@@ -1906,8 +1906,21 @@ function handleGenerateDiary() {
         });
     }
     
-    // 이미지가 업로드되었는지 확인 (currentFile이 있으면 재생성 가능)
-    if (!AppState.currentFile) {
+    // 이미지가 업로드되었는지 확인
+    // 1. currentFile이 있으면 재생성 가능
+    // 2. currentFile이 없어도 미리보기 이미지가 있으면 재생성 가능 (이미 일기가 생성된 상태)
+    const hasCurrentFile = AppState.currentFile !== null;
+    const hasPreviewImage = AppState.elements.previewImage && AppState.elements.previewImage.src && 
+                           AppState.elements.previewImage.src !== '' && 
+                           !AppState.elements.previewImage.src.includes('data:image/svg+xml');
+    
+    console.log('🔍 재생성 가능 여부 확인:', {
+        hasCurrentFile,
+        hasPreviewImage,
+        previewImageSrc: AppState.elements.previewImage ? AppState.elements.previewImage.src.substring(0, 50) + '...' : '없음'
+    });
+    
+    if (!hasCurrentFile && !hasPreviewImage) {
         console.error('❌ 업로드된 이미지가 없습니다');
         console.log('🔍 AppState 전체 상태:', {
             currentFile: AppState.currentFile,
@@ -2036,7 +2049,7 @@ async function getImageAsBase64() {
     console.log('🔍 AppState.currentImage:', AppState.currentImage ? '[이미지 존재]' : '[이미지 없음]');
     console.log('🔍 AppState.currentFile:', AppState.currentFile ? '[파일 존재]' : '[파일 없음]');
     
-    // currentImage가 있으면 바로 사용 (이미 Base64 형태)
+    // 1. currentImage가 있으면 바로 사용 (이미 Base64 형태)
     if (AppState.currentImage) {
         console.log('✅ currentImage 사용');
         // data:image/jpeg;base64, 부분을 제거하고 순수 Base64만 반환
@@ -2044,27 +2057,59 @@ async function getImageAsBase64() {
         return base64;
     }
     
-    // currentImage가 없으면 currentFile 사용
-    if (!AppState.currentFile) {
-        console.error('❌ 업로드된 이미지나 파일이 없습니다');
-        throw new Error('업로드된 사진이 없습니다.');
+    // 2. currentFile이 있으면 파일을 Base64로 변환
+    if (AppState.currentFile) {
+        const file = AppState.currentFile;
+        console.log('✅ currentFile 사용:', file.name, file.type, file.size);
+        
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // data:image/jpeg;base64, 부분을 제거하고 순수 Base64만 반환
+                const base64 = e.target.result.split(',')[1];
+                resolve(base64);
+            };
+            reader.onerror = function() {
+                reject(new Error('파일 읽기 실패'));
+            };
+            reader.readAsDataURL(file);
+        });
     }
     
-    const file = AppState.currentFile;
-    console.log('✅ currentFile 사용:', file.name, file.type, file.size);
-    
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = function(e) {
+    // 3. currentFile이 없으면 미리보기 이미지에서 Base64 추출
+    if (AppState.elements.previewImage && AppState.elements.previewImage.src) {
+        const previewSrc = AppState.elements.previewImage.src;
+        console.log('✅ 미리보기 이미지 사용:', previewSrc.substring(0, 50) + '...');
+        
+        // data:image/... 형태인지 확인
+        if (previewSrc.startsWith('data:image/')) {
             // data:image/jpeg;base64, 부분을 제거하고 순수 Base64만 반환
-            const base64 = e.target.result.split(',')[1];
-            resolve(base64);
-        };
-        reader.onerror = function() {
-            reject(new Error('파일 읽기 실패'));
-        };
-        reader.readAsDataURL(file);
-    });
+            const base64 = previewSrc.split(',')[1];
+            return base64;
+        } else {
+            // 외부 URL인 경우 Canvas를 사용하여 Base64로 변환
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    const base64 = canvas.toDataURL('image/jpeg', 0.9).split(',')[1];
+                    resolve(base64);
+                };
+                img.onerror = function() {
+                    reject(new Error('미리보기 이미지 로드 실패'));
+                };
+                img.src = previewSrc;
+            });
+        }
+    }
+    
+    console.error('❌ 업로드된 이미지나 파일이 없습니다');
+    throw new Error('업로드된 사진이 없습니다.');
 }
 
 // 일기 생성 프롬프트 생성
