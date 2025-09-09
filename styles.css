@@ -1232,50 +1232,59 @@ footer {
 /* 모바일 대응 */
 @media (max-width: 768px) {
     .diary-card .card-header {
-        flex-direction: column; /* 세로 배치로 복원 */
-        justify-content: center;
+        flex-direction: row; /* 가로 배치로 변경 */
+        justify-content: space-between;
         align-items: center;
-        text-align: center;
-        padding: 24px 32px; /* 원래 패딩으로 복원 */
-        gap: 15px;
+        text-align: left;
+        padding: 16px 20px; /* 헤더 패딩 축소 */
+        gap: 12px;
     }
     
     .diary-card .card-header h3 {
-        font-size: 1.5rem; /* 원래 폰트 크기로 복원 */
+        font-size: 1.2rem; /* 헤더 폰트 크기 축소 */
         margin: 0;
+        flex: 1; /* 남은 공간 차지 */
     }
     
     .generate-btn {
-        padding: 12px 24px; /* 원래 패딩으로 복원 */
-        font-size: 1rem; /* 원래 폰트 크기로 복원 */
-        border-radius: 12px; /* 원래 모서리 둥글기로 복원 */
+        padding: 8px 16px; /* 버튼 크기 축소 */
+        font-size: 0.9rem; /* 버튼 폰트 크기 축소 */
+        border-radius: 8px;
+        white-space: nowrap; /* 텍스트 줄바꿈 방지 */
     }
     
     .diary-card .card-content {
-        padding: 32px; /* 원래 패딩으로 복원 */
+        padding: 20px; /* 콘텐츠 패딩 축소 */
     }
     
     .diary-text {
-        font-size: 1.1rem;
-        padding: 20px;
-        max-width: 100%; /* 원래 설정으로 복원 */
+        font-size: 1rem;
+        padding: 16px;
+        max-width: none; /* 가로 길이 제한 해제 */
     }
     
-    /* 일기 카드 원래 크기로 복원 */
+    /* 일기 카드 모바일에서 더 넓게 */
     .diary-card {
-        margin: 0 auto; /* 중앙 정렬 */
-        width: 100%; /* 원래 너비로 복원 */
-        max-width: 800px; /* 원래 최대 너비로 복원 */
-        border-radius: 20px; /* 원래 모서리 둥글기로 복원 */
-        position: static; /* 원래 위치로 복원 */
-        left: auto;
-        transform: none; /* 변환 제거 */
+        margin: 0 -10px; /* 좌우 마진으로 확장 */
+        width: calc(100% + 20px); /* 너비 확장 */
+        max-width: none; /* 최대 너비 제한 해제 */
+        border-radius: 16px;
     }
     
-    /* 일기 섹션 원래 설정으로 복원 */
+    /* 키워드 입력 카드도 더 넓게 */
+    .keyword-input-section {
+        margin: 0 -10px; /* 좌우 마진으로 확장 */
+        width: calc(100% + 20px); /* 너비 확장 */
+    }
+    
+    .keyword-input-section .card {
+        border-radius: 16px;
+    }
+    
+    /* 일기 섹션 확장 */
     .diary-section {
-        margin: 0; /* 원래 마진으로 복원 */
-        overflow: visible; /* 원래 오버플로우로 복원 */
+        margin: 0 -10px; /* 섹션 레벨에서도 확장 */
+        overflow: hidden; /* 넘치는 부분 숨김 */
     }
 }
 
@@ -1363,43 +1372,58 @@ footer {
 /* 작은 모바일 화면 대응 */
 @media (max-width: 480px) {
     .diary-card .card-header {
-        flex-direction: column; /* 세로 배치로 복원 */
-        justify-content: center;
+        flex-direction: row; /* 가로 배치 유지 */
+        justify-content: space-between;
         align-items: center;
-        text-align: center;
-        padding: 20px 24px; /* 원래 패딩으로 복원 */
-        gap: 12px;
+        text-align: left;
+        padding: 12px 16px; /* 더 작은 헤더 패딩 */
+        gap: 10px;
     }
     
     .diary-card .card-header h3 {
-        font-size: 1.3rem; /* 원래 크기로 복원 */
+        font-size: 1.1rem; /* 더 작은 헤더 폰트 */
         margin: 0;
+        flex: 1;
     }
     
     .generate-btn {
-        padding: 10px 20px; /* 원래 크기로 복원 */
-        font-size: 0.95rem;
-        border-radius: 10px;
+        padding: 6px 12px; /* 더 작은 버튼 */
+        font-size: 0.85rem;
+        border-radius: 6px;
+        white-space: nowrap;
     }
     
     .diary-card .card-content {
-        padding: 24px; /* 원래 패딩으로 복원 */
+        padding: 16px; /* 더 작은 콘텐츠 패딩 */
     }
     
-    /* 일기 카드 원래 크기로 복원 */
+    .diary-text {
+        font-size: 0.95rem;
+        padding: 14px;
+        max-width: none;
+    }
+    
+    /* 일기 카드 작은 모바일에서도 더 넓게 */
     .diary-card {
-        margin: 0 auto; /* 중앙 정렬 */
-        width: 100%; /* 원래 너비로 복원 */
-        max-width: 800px; /* 원래 최대 너비로 복원 */
-        border-radius: 20px; /* 원래 모서리 둥글기로 복원 */
-        position: static; /* 원래 위치로 복원 */
-        left: auto;
-        transform: none; /* 변환 제거 */
+        margin: 0 -8px; /* 좌우 마진으로 확장 */
+        width: calc(100% + 16px); /* 너비 확장 */
+        max-width: none;
+        border-radius: 14px;
     }
     
-    /* 일기 섹션 원래 설정으로 복원 */
+    /* 키워드 입력 카드도 더 넓게 */
+    .keyword-input-section {
+        margin: 0 -8px; /* 좌우 마진으로 확장 */
+        width: calc(100% + 16px); /* 너비 확장 */
+    }
+    
+    .keyword-input-section .card {
+        border-radius: 14px;
+    }
+    
+    /* 일기 섹션 확장 */
     .diary-section {
-        margin: 0; /* 원래 마진으로 복원 */
-        overflow: visible; /* 원래 오버플로우로 복원 */
+        margin: 0 -8px; /* 섹션 레벨에서도 확장 */
+        overflow: hidden;
     }
 }
