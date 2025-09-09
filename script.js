@@ -1897,6 +1897,14 @@ function handleGenerateDiary() {
         return;
     }
     
+    // 키워드 입력 상태 확인
+    const keywords = AppState.elements.diaryKeywords ? AppState.elements.diaryKeywords.value.trim() : '';
+    if (keywords) {
+        console.log('🔑 사용자 키워드:', keywords);
+    } else {
+        console.log('🔑 키워드 없음 - 기본 일기 생성');
+    }
+    
     console.log('✅ 이미지 확인 완료, 일기 생성 시작');
     generateDiaryWithBackend();
 }
@@ -2049,7 +2057,12 @@ function createDiaryPrompt() {
     if (keywords) {
         const keywordList = keywords.split(',').map(k => k.trim()).filter(k => k.length > 0);
         if (keywordList.length > 0) {
+            console.log('🔑 프롬프트에 포함될 키워드:', keywordList);
             prompt += `\n\n다음 키워드들을 자연스럽게 포함하여 일기를 작성해주세요: ${keywordList.join(', ')}`;
+            prompt += `\n\n키워드 사용 가이드:
+- 키워드들을 강제로 넣지 말고 자연스럽게 일기 내용에 녹여내세요
+- 키워드가 일기 내용과 어울리지 않으면 무시하고 자연스러운 내용을 우선하세요
+- 키워드는 일기의 분위기나 감정을 표현하는 데 활용하세요`;
         }
     }
 
@@ -2067,11 +2080,12 @@ function createDiaryPrompt() {
 10. 사진의 분위기와 색감, 조명 등을 고려하여 감정을 표현하기`;
 
     if (keywords) {
-        prompt += `\n11. 위에서 언급된 키워드들을 자연스럽게 일기에 녹여내기`;
+        prompt += `\n11. 위에서 언급된 키워드들을 자연스럽게 일기에 녹여내기 (강제로 넣지 말고 자연스럽게)`;
     }
 
     prompt += `\n\n일기 내용만 작성해주세요 (제목은 제외):`;
 
+    console.log('📝 생성된 프롬프트:', prompt.substring(0, 200) + '...');
     return prompt;
 }
 
