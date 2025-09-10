@@ -67,9 +67,9 @@ function initializeElements() {
         generateDiary: document.getElementById('generateDiary'),
         diaryContent: document.getElementById('diaryContent'),
         diaryKeywords: document.getElementById('diaryKeywords'),
-        // 화면 저장 관련 요소들
-        saveSection: document.getElementById('saveSection'),
-        saveScreenBtn: document.getElementById('saveScreenBtn')
+        // 화면 저장 관련 요소들 (제거됨)
+        // saveSection: document.getElementById('saveSection'),
+        // saveScreenBtn: document.getElementById('saveScreenBtn')
     };
     
     // 모든 요소가 존재하는지 확인
@@ -256,14 +256,14 @@ function showUploadReady() {
 function setupEventListeners() {
     console.log('🎯 이벤트 리스너 설정');
     
-    const { uploadArea, fileInput, uploadBtn, generateDiary, saveScreenBtn } = AppState.elements;
+    const { uploadArea, fileInput, uploadBtn, generateDiary } = AppState.elements;
     
     // 모든 기존 이벤트 리스너 제거
     uploadArea.removeEventListener('click', handleUploadAreaClick);
     uploadBtn.removeEventListener('click', handleUploadButtonClick);
     fileInput.removeEventListener('change', handleFileChange);
     generateDiary.removeEventListener('click', handleGenerateDiary);
-    saveScreenBtn.removeEventListener('click', handleSaveScreen);
+    // saveScreenBtn.removeEventListener('click', handleSaveScreen);
     
     // 파일 입력 변경 이벤트
     fileInput.addEventListener('change', handleFileChange);
@@ -277,8 +277,8 @@ function setupEventListeners() {
     // 일기 생성 버튼 이벤트
     generateDiary.addEventListener('click', handleGenerateDiary);
     
-    // 화면 저장 버튼 이벤트
-    saveScreenBtn.addEventListener('click', handleSaveScreen);
+    // 화면 저장 버튼 이벤트 (제거됨)
+    // saveScreenBtn.addEventListener('click', handleSaveScreen);
     
     // 드래그 앤 드롭 이벤트
     uploadArea.addEventListener('dragover', handleDragOver);
@@ -735,7 +735,7 @@ async function handleFile(file) {
 function showAnalysisSection() {
     console.log('📊 분석 섹션 표시');
     
-    const { analysisSection, diarySection, saveSection } = AppState.elements;
+    const { analysisSection, diarySection } = AppState.elements;
     if (analysisSection) {
         analysisSection.style.display = 'block';
         analysisSection.classList.add('fade-in');
@@ -747,11 +747,11 @@ function showAnalysisSection() {
         diarySection.classList.add('fade-in');
     }
     
-    // 화면 저장 섹션도 표시
-    if (saveSection) {
-        saveSection.style.display = 'block';
-        saveSection.classList.add('fade-in');
-    }
+    // 화면 저장 섹션도 표시 (제거됨)
+    // if (saveSection) {
+    //     saveSection.style.display = 'block';
+    //     saveSection.classList.add('fade-in');
+    // }
 }
 
 // 로딩 상태 표시
